@@ -38,7 +38,7 @@ function saveAndroidOutcome(){
 }
 function showAndroidOutcome(){
  const defeated=matchWinner===0?ANDROID_LIMIT:androidWave-1;
- const format=amount=>(amount/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+ const format=amount=>(amount/100).toLocaleString('en-US',{style:'currency',currency:'USD'});
  const awardName=sentinelAward(defeated);
  $('#watchcomplete h2').textContent=(defeated===20?'ALL 20 ANDROIDS DEFEATED':'GAME OVER · '+defeated+' / 20 ANDROIDS DEFEATED')+(awardName?' · '+awardName.toUpperCase():'');
  $('#sessionlabel').textContent='EARNED '+format(arcadeScore.total)+' · '+androidSaveState;
