@@ -1,0 +1,18 @@
+'use strict';
+const profiles=[
+{name:'Dandara',home:'Salvador, Bahia',personality:'A calm community leader who listens first and strikes with purpose.',win:'The rhythm was there. You only had to listen.',lose:'A lesson received. Now let us play again.',pitch:184},
+{name:'Jurema',home:'Recife, Pernambuco',personality:'A bold, quick-witted competitor who treats every exchange like a conversation.',win:'You answered the first question. I had three more.',lose:'Good answer. Next time, a different question.',pitch:205},
+,
+{name:'Zinga',home:'São Luís, Maranhão',personality:'Fearless and theatrical, she fights with joy and refuses to be intimidated.',win:'You watched the flame and forgot the feet.',lose:'The fire is still burning. Another roda!',pitch:193},
+{name:'Lua',home:'Belém, Pará',personality:'Quiet, observant, and mischievous; she hides her intentions behind a smile.',win:'I left you an opening. It was not the one you thought.',lose:'You saw through that one. I admire that.',pitch:218},
+{name:'Iara',home:'Manaus, Amazonas',personality:'Adaptable and adventurous, she changes pace like a river changes course.',win:'Do not fight the current. Learn where it is going.',lose:'The river bends. So will I.',pitch:176},
+{name:'Nala',home:'São Paulo, São Paulo',personality:'Focused and fiercely competitive, she loves studying patterns and breaking them.',win:'Your pattern was clear. Mine was still changing.',lose:'I have the information I needed. Again.',pitch:188},
+{name:'Meilin',home:'Curitiba, Paraná',personality:'A Chinese-Brazilian comedian and patron of the studio, raised by Mestre Maré after her parents abandoned her in Brazil. She calls him Vovo; he calls her May. His encouragement helped her recognize her natural gift for comedy. She trains low in her Curitiba garden, wearing bespoke jade and gold embroidery.',win:'One well-placed step can change everything.',lose:'That timing deserves respect. Let me adjust mine.',pitch:212},
+{name:'Jaci',home:'Fortaleza, Ceará',personality:'Playful and daring, she enjoys testing the edge of an opponent’s patience.',win:'You almost caught me. Almost makes a fine story.',lose:'That was clever! Now I want another turn.',pitch:200},
+{name:'Sol',home:'Rio de Janeiro, Rio de Janeiro',personality:'A white Irish-Brazilian fighter with copper-red hair and Celtic-trimmed training clothes; warm, charismatic, and fiercely loyal to her roda.',win:'A beautiful game. Shall we make the next one better?',lose:'You earned that smile. I will earn the next one.',pitch:226},
+{name:'Ayana',home:'Belo Horizonte, Minas Gerais',personality:'Composed and protective, she combines disciplined practice with generous teaching.',win:'Strength means little without control.',lose:'I lost the exchange, not my direction.',pitch:172},
+{name:'Bento',home:'Porto Alegre, Rio Grande do Sul',personality:'A patient challenger who trusts steady footwork and well-timed counters.',win:'Nothing fancy. Just the right move at the right time.',lose:'Fair play. Let me get my footing again.',pitch:112},
+,
+{name:'Nestor',home:'Ouro Preto, Minas Gerais',personality:'A calculating veteran challenger, an old tactician who respects a worthy opponent.',win:'The oldest trick still works on the newest confidence.',lose:'Well now. You have given me something to think about.',pitch:98},
+{name:'Mestre Maré',home:'Salvador, Bahia',personality:'A commanding but generous fictional mestre who raised Meilin and encouraged her comedy. She calls him Vovo; he calls her May. His established appearance is inspired by Mestre Curtis Pierre.',win:'Respect the circle. Then show me what you learned.',lose:'Very good. A teacher must welcome a worthy challenge.',pitch:104}
+];
