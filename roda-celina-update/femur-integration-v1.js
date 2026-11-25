@@ -8,21 +8,26 @@
 const FEMUR_ID=17;
 // The live engine is served from a <base href> on another host; the Femur package ships
 // beside this file, so resolve against the script's own directory, not the document base.
-const FEMUR_ROOT=new URL('roda/fighters/femur/',document.baseURI).href;
+const FEMUR_ROOT=new URL('/roda/fighters/femur/',new URL(document.currentScript.src,location.href).origin).href;
 const FEMUR_STAGES=[
  {key:'moonlit-colonnade',name:'MOONLIT COLONNADE',file:'arenas/moonlit-colonnade.webp'},
  {key:'ivory-arches',name:'HALL OF THE IVORY ARCHES',file:'arenas/ivory-arches.webp'},
  {key:'obsidian-crystal-shrine',name:'OBSIDIAN CRYSTAL SHRINE',file:'arenas/obsidian-crystal-shrine.webp'},
- {key:'indigo-hound-sanctuary',name:'INDIGO HOUND SANCTUARY',file:'arenas/sealed-serpent-gate.webp'},
+ {key:'indigo-hound-sanctuary',name:'INDIGO HOUND SANCTUARY',file:'arenas/indigo-hound-sanctuary.webp'},
  {key:'sealed-serpent-gate',name:'THE SEALED SERPENT GATE',file:'arenas/sealed-serpent-gate.webp'}
 ];
 // The fifth slot intentionally reuses a supplied asset until its own file is confirmed; see manifest.
 const FEMUR_ARENA_FILES=['moonlit-colonnade.webp','ivory-arches.webp','obsidian-crystal-shrine.webp','indigo-hound-sanctuary.webp','sealed-serpent-gate.webp'];
 const FEMUR_ARENA_NAMES=['MOONLIT COLONNADE','HALL OF THE IVORY ARCHES','OBSIDIAN CRYSTAL SHRINE','INDIGO HOUND SANCTUARY','THE SEALED SERPENT GATE'];
 const COSTUME_KEY='roda-femur-alt-angola-v1';
-const FEMUR_FRAME={w:512,h:448,ax:256,ay:390};
+const FEMUR_FRAME={w:768,h:576,ax:240,ay:552};
 // Femur is 170 cm tall against the roster's ~300-unit fighter field; the atlas cell is 448 tall.
-const FEMUR_SCALE=1.30;
+// The roster draws every fighter at visualHeight = trait.height/174, and their sprite art is
+// authored so that a 174cm fighter is 305 field units tall. Femur's art is normalised to a
+// 390px figure, so scale = 305/390 * height/174 keeps her exactly in step with the cast.
+const FEMUR_ART_HEIGHT=512, FEMUR_REF_UNITS=305, FEMUR_REF_CM=174;
+function femurScaleFor(id){const cm=(typeof fighterTraits!=='undefined'&&fighterTraits[id]&&fighterTraits[id].height)||170;return FEMUR_REF_UNITS/FEMUR_ART_HEIGHT*(cm/FEMUR_REF_CM);}
+const FEMUR_SCALE=femurScaleFor(17);
 
 /* ---------- 1. Roster slot ---------- */
 // The engine declares roster, playableIds, arenas and the other tables as consts, so this module
@@ -32,7 +37,7 @@ const FEMUR_ROSTER_ENTRY=['Femur','The rival from another roda'];
 // roster the UI reads is replaced by a frozen copy that carries Femur in the slot the art left.
 // roster is the same array object the selection screen iterates: fill the hole in place.
 // It already has 17 entries (the hole counts), so append Femur at the end of the hole's slot.
-if(!roster[FEMUR_ID])roster.push(FEMUR_ROSTER_ENTRY);
+if(roster[FEMUR_ID]?.[0]!=='Femur'||!playableIds.includes(FEMUR_ID))throw new Error('Corrected game-clarity engine must reserve fighter ID 17');
 const femurPlayableIds=Object.freeze(roster.flatMap((f,id)=>f?[id]:[]));
 window.__femurRoster=roster.map((f,i)=>i+':'+(f?f[0]:'--')).join(' ');
 window.__femurPlayable=femurPlayableIds.slice();
@@ -44,7 +49,7 @@ arcadeOpponents=function(playerId){return femurPlayableIds.filter(id=>id!==CELIN
 profiles[FEMUR_ID]={
  name:'Femur',
  home:'A roda of her own',
- personality:'An independent rival who answers every student of Mestre Maré and both male protagonists. Physical Capoeira Angola only; no powers, no weapons.',
+ personality:'Gula made her immortal. She seeks to become the Goddess above Goddesses. An independent rival to Mestre Maré and his students and both male protagonists. Unarmed Capoeira Angola only.',
  win:'I played the game you taught me. Now play mine.',
  lose:'You found the opening. I will find it next time.',
  pitch:198
@@ -62,7 +67,7 @@ const FEMUR_BUTTONS=[
  {button:'RB',clip:'combo_rb',phases:[['rasteira','Rasteira','low',0,6,3],['chapa','Chapa','mid',7,15,10],['queixada','Queixada','high',16,26,21]]}
 ];
 function buildFemurMoves(){
- const old=characterMoves[FEMUR_ID]||moves;
+ const old=moves;
  characterMoves[FEMUR_ID]=FEMUR_BUTTONS.map((kit,slot)=>{
   const phases=kit.phases.map(([key,name,level,first,last,contact])=>({
    key,name,level,rank:slot>=4?2:1,frames:last-first+1,
@@ -82,32 +87,11 @@ buildFemurMoves();
 const femurClips={};
 const femurImages={};
 const femurAltImages={};
-const femurClipMeta={
- ginga:{file:'ginga.webp',count:22,columns:6,ms:90,loop:true},
- advance:{file:'advance.webp',count:12,columns:6,ms:80,loop:true},
- retreat:{file:'retreat.webp',count:10,columns:5,ms:80,loop:true},
- roll_forward:{file:'roll_forward.webp',count:17,columns:6,ms:45,loop:false},
- roll_backward:{file:'roll_backward.webp',count:17,columns:6,ms:45,loop:false},
- guard:{file:'guard.webp',count:4,columns:4,ms:110,loop:true},
- crouch:{file:'crouch.webp',count:3,columns:3,ms:120,loop:true},
- low_guard:{file:'low_guard.webp',count:4,columns:4,ms:110,loop:true},
- jump:{file:'jump.webp',count:8,columns:4,ms:70,loop:false},
- hit:{file:'hit.webp',count:4,columns:4,ms:70,loop:false},
- fall:{file:'fall.webp',count:7,columns:7,ms:80,loop:false},
- recover:{file:'recover.webp',count:9,columns:5,ms:80,loop:false},
- defeat:{file:'defeat.webp',count:9,columns:5,ms:100,loop:false},
- round_win:{file:'round_win.webp',count:22,columns:6,ms:90,loop:true},
- combo_a:{file:'combo_a.webp',count:29,columns:6,ms:58,loop:false},
- combo_b:{file:'combo_b.webp',count:24,columns:6,ms:58,loop:false},
- combo_x:{file:'combo_x.webp',count:35,columns:6,ms:58,loop:false},
- combo_y:{file:'combo_y.webp',count:33,columns:6,ms:58,loop:false},
- combo_lb:{file:'combo_lb.webp',count:26,columns:6,ms:58,loop:false},
- combo_rb:{file:'combo_rb.webp',count:27,columns:6,ms:58,loop:false}
-};
+const femurClipMeta={"ginga": {"file": "ginga.webp", "count": 1, "columns": 6, "ms": 90, "loop": true}, "guard": {"file": "guard.webp", "count": 4, "columns": 4, "ms": 60, "loop": false}, "low_guard": {"file": "low_guard.webp", "count": 4, "columns": 4, "ms": 60, "loop": false}, "crouch": {"file": "crouch.webp", "count": 3, "columns": 3, "ms": 60, "loop": false}, "hit": {"file": "hit.webp", "count": 4, "columns": 4, "ms": 60, "loop": false}, "fall": {"file": "fall.webp", "count": 7, "columns": 6, "ms": 60, "loop": false}, "recover": {"file": "recover.webp", "count": 3, "columns": 6, "ms": 60, "loop": false}, "defeat": {"file": "defeat.webp", "count": 9, "columns": 6, "ms": 60, "loop": false}, "round_win": {"file": "round_win.webp", "count": 22, "columns": 6, "ms": 90, "loop": true}, "advance": {"file": "advance.webp", "count": 12, "columns": 6, "ms": 90, "loop": true}, "retreat": {"file": "retreat.webp", "count": 10, "columns": 6, "ms": 90, "loop": true}, "jump": {"file": "jump.webp", "count": 8, "columns": 6, "ms": 60, "loop": false}, "roll_forward": {"file": "roll_forward.webp", "count": 12, "columns": 6, "ms": 29, "loop": false}, "roll_backward": {"file": "roll_backward.webp", "count": 12, "columns": 6, "ms": 29, "loop": false}, "kick_bencao": {"file": "01-bencao.png", "count": 6, "columns": 3, "ms": 80, "loop": false}, "kick_chapa": {"file": "02-chapa.png", "count": 6, "columns": 3, "ms": 80, "loop": false}, "kick_crescent": {"file": "04-meia-lua-de-frente.png", "count": 6, "columns": 3, "ms": 80, "loop": false}, "kick_queixada": {"file": "05-queixada.png", "count": 6, "columns": 3, "ms": 80, "loop": false}, "kick_martelo": {"file": "03-martelo.png", "count": 6, "columns": 3, "ms": 80, "loop": false}, "kick_rasteira": {"file": "01-bencao.png", "count": 6, "columns": 3, "ms": 80, "loop": false}, "kick_compasso": {"file": "06-meia-lua-de-compasso.png", "count": 6, "columns": 3, "ms": 80, "loop": false}, "kick_low_chapa": {"file": "01-bencao.png", "count": 6, "columns": 3, "ms": 80, "loop": false}, "combo_a": {"file": "combo_a.webp", "count": 9, "columns": 6, "ms": 60, "loop": false}, "combo_b": {"file": "combo_b.webp", "count": 9, "columns": 6, "ms": 60, "loop": false}, "combo_x": {"file": "combo_x.webp", "count": 9, "columns": 6, "ms": 60, "loop": false}, "combo_y": {"file": "combo_y.webp", "count": 9, "columns": 6, "ms": 60, "loop": false}, "combo_lb": {"file": "combo_lb.webp", "count": 9, "columns": 6, "ms": 60, "loop": false}, "combo_rb": {"file": "combo_rb.webp", "count": 9, "columns": 6, "ms": 60, "loop": false}};
 for(const [name,meta] of Object.entries(femurClipMeta)){
  const im=new Image();im.src=FEMUR_ROOT+meta.file;femurImages[name]=im;femurClips[name]=meta;
 }
-const femurPortrait=new Image();femurPortrait.src=FEMUR_ROOT+'portrait.png';
+const femurPortrait=new Image();femurPortrait.src=FEMUR_ROOT+'select-card.webp';
 const femurComics={};
 const FEMUR_COMIC_KEYS=['femur_opening_celina','femur_student','femur_protagonist','femur_other','challenge_femur','aisha_challenge_femur','femur_victory','femur_defeat','player_defeats_femur','player_loses_to_femur'];
 for(const key of FEMUR_COMIC_KEYS){const im=new Image();im.src=FEMUR_ROOT+'comics/'+key+'.webp';femurComics[key]=im;}
@@ -118,26 +102,32 @@ function femurFrameRect(clip,index){
  const i=Math.max(0,Math.min(meta.count-1,Math.floor(index)));
  return {x:(i%meta.columns)*FEMUR_FRAME.w,y:Math.floor(i/meta.columns)*FEMUR_FRAME.h,w:FEMUR_FRAME.w,h:FEMUR_FRAME.h,meta};
 }
+const FEMUR_TICK_MS=1000/60;
 function femurState(p){
- if(p.hp<=0)return {clip:'defeat',age:tick-(p.defeatAt??p.hitAt)};
- if(p.down>0)return {clip:(p.down<8?'fall':'defeat'),age:tick-(p.fallAt??p.hitAt)};
- if(p.stun>0&&!p.guardStun)return {clip:'hit',age:tick-(p.hitAt||0)};
+ const hitAge=Math.max(0,tick-(Number.isFinite(p.hitAt)?p.hitAt:tick));
+ const progress=(clip,t)=>({clip,age:Math.max(0,Math.min(.999999,t))*femurClips[clip].count*femurClips[clip].ms});
+ if(p.hp<=0)return progress('defeat',hitAge/30);
+ if(p.down>0){if(p.down<=14)return progress('recover',(14-p.down)/14);return progress('fall',hitAge/18);}
+ if(p.stun>0&&!p.guardStun)return progress('hit',hitAge/Math.max(1,hitAge+p.stun));
+ if(p.rollTime>0)return progress(p.rollDirection===p.dir?'roll_forward':'roll_backward',(24-p.rollTime)/24);
  if(p.attack!==null){
-  const m=moveFor(p,p.attack);
-  if(p.at>=m.start&&p.at<m.start+m.active)return {clip:'combo_'+m.button.toLowerCase(),age:(p.at-m.start)*16.6};
+  const m=moveFor(p,p.attack),clip='combo_'+m.button.toLowerCase();
+  if(p.at<m.start)return {clip,age:0};
+  // One source pose per active game tick; the contact window uses the identical frame index.
+  return {clip,age:Math.max(0,Math.min(femurClips[clip].count-1,p.at-m.start))*femurClips[clip].ms};
  }
- if(p.rollTime>0)return {clip:p.rollDirection===p.dir?'roll_forward':'roll_backward',age:(24-p.rollTime)*45};
- if(p.y>0||p.takeoff>0||p.landing>0)return {clip:'jump',age:(32-(p.rollTime||0))*30};
- if(p.block)return {clip:p.crouch?'low_guard':'guard',age:tick*.11};
- if(p.crouch)return {clip:'crouch',age:tick*.12};
- if(Math.abs(p.vx)>.25)return {clip:p.vx*p.dir>0?'advance':'retreat',age:tick*.08};
- return {clip:'ginga',age:tick*.09};
+ if(p.y>0||p.takeoff>0||p.landing>0)return progress('jump',p.takeoff>0?0:p.landing>0?.95:Math.max(.1,Math.min(.9,(14.8-p.vy)/29.6)));
+ if(p.block)return {clip:p.crouch?'low_guard':'guard',age:tick*FEMUR_TICK_MS};
+ if(p.crouch)return {clip:'crouch',age:tick*FEMUR_TICK_MS};
+ if(Math.abs(p.vx)>.25)return {clip:p.vx*p.dir>0?'advance':'retreat',age:tick*FEMUR_TICK_MS};
+ // Match the roster: everyone else stands on one pose until they travel.
+ return {clip:'ginga',age:0};
 }
 function drawFemurFrame(p,clip,age,groundY){
  const im=femurImages[clip]||femurImages.ginga;if(!im||!im.complete||!im.naturalWidth)return false;
- const meta=femurClips[clip]||femurClips.ginga;const index=meta.loop?Math.floor(age/meta.ms)%meta.count:Math.min(meta.count-1,Math.floor(age/meta.ms));
+ const meta=femurClips[clip]||femurClips.ginga;const index=meta.loop?Math.max(0,Math.floor(age/meta.ms+1e-8))%meta.count:Math.max(0,Math.min(meta.count-1,Math.floor(age/meta.ms+1e-8)));
  const r=femurFrameRect(clip,index);
- ctx.save();ctx.translate(p.x,groundY);ctx.scale(p.dir<0?-FEMUR_SCALE:FEMUR_SCALE,FEMUR_SCALE);
+ const sc=femurScaleFor(p.id);ctx.save();ctx.translate(p.x,groundY);ctx.scale(p.dir<0?-sc:sc,sc);
  ctx.drawImage(im,r.x,r.y,r.w,r.h,-FEMUR_FRAME.ax,-FEMUR_FRAME.ay,r.w,r.h);ctx.restore();return true;
 }
 const femurOriginalDrawFighter=drawFighter;
@@ -145,23 +135,24 @@ drawFighter=function(p){
  if(p.id!==FEMUR_ID){femurOriginalDrawFighter(p);return}
  ctx.fillStyle='#10190f66';ctx.beginPath();ctx.ellipse(p.x,592,78,12,0,0,Math.PI*2);ctx.fill();
  const state=femurState(p);
- if(!drawFemurFrame(p,state.clip,state.age,590-p.y))drawFemurFrame(p,'ginga',tick*.09,590-p.y);
+ if(!drawFemurFrame(p,state.clip,state.age,590-p.y))drawFemurFrame(p,'ginga',tick*FEMUR_TICK_MS,590-p.y);
  if(p.combo>=2&&p.comboTimer>0){text(p.combo+' HIT',p.x,205,34,'#ffdb6e','center');text('COMBINATION',p.x,225,12,'#eee6c8','center')}
 };
 const femurOriginalFacePortrait=facePortrait;
 facePortrait=function(c,id){
  if(id!==FEMUR_ID){femurOriginalFacePortrait(c,id);return}
  const im=femurPortrait;if(!im.complete||!im.naturalWidth){im.addEventListener('load',()=>facePortrait(c,id),{once:true});return}
- const g=c.getContext('2d');const side=Math.min(im.naturalWidth,im.naturalHeight);
+ const g=c.getContext('2d');const ratio=c.width/c.height;
+ const sw=Math.min(im.naturalWidth,im.naturalHeight*ratio),sh=sw/ratio;
  g.clearRect(0,0,c.width,c.height);
- g.drawImage(im,0,(im.naturalHeight-side)*.12,side,side,0,0,c.width,c.height);
+ g.drawImage(im,(im.naturalWidth-sw)/2,(im.naturalHeight-sh)*.10,sw,sh,0,0,c.width,c.height);
 };
 selectFaceBounds[FEMUR_ID]=[76,38,44];
 
 /* ---------- 5. Portraits on the roster, result cards ---------- */
-const femurPortraitSrc=FEMUR_ROOT+'portrait.png';
+const femurPortraitSrc=FEMUR_ROOT+'select-card.webp';
 // The roster grid paints from portraitImages[id]; give it Femur's card art.
-if(portraitImages.length<=FEMUR_ID)portraitImages[FEMUR_ID]=femurPortrait;
+portraitImages[FEMUR_ID]=femurPortrait;
 const femurOriginalShowResultCard=showResultCard;
 showResultCard=function(slot,id,whiteUniform){
  if(id===FEMUR_ID){const card=$('#'+slot+'portrait');card.src=femurPortraitSrc;card.alt='Femur fighter card';return}
@@ -170,17 +161,15 @@ showResultCard=function(slot,id,whiteUniform){
 
 /* ---------- 6. Five arenas as Femur's own stages ---------- */
 const FEMUR_STAGE_BASE=stageNames.length;
-for(let i=0;i<FEMUR_ARENA_NAMES.length;i++){arenas.push({name:FEMUR_ARENA_NAMES[i],file:'femur/'+FEMUR_ARENA_FILES[i],owner:i===0?FEMUR_ID:undefined});}
-stageNames.splice(0,stageNames.length,...arenas.map(a=>a.name));
+for(let i=0;i<FEMUR_ARENA_NAMES.length;i++){arenas.push({name:FEMUR_ARENA_NAMES[i],file:FEMUR_ROOT+'arenas/'+FEMUR_ARENA_FILES[i],owner:i===0?FEMUR_ID:undefined});}
+stageNames.push(...FEMUR_ARENA_NAMES);
 const femurArenaImages=FEMUR_ARENA_FILES.map(f=>{const im=new Image();im.src=FEMUR_ROOT+'arenas/'+f;return im});
 homeStages.set(FEMUR_ID,FEMUR_STAGE_BASE);
-let femurOuterDrawArena=drawArena;
-const femurOriginalDrawArena=function(){return femurOuterDrawArena.apply(this,arguments)};
+const femurOriginalDrawArena=drawArena;
 function femurSlotForStage(stage){const base=femurStageBase();return stage>=base&&stage<base+FEMUR_ARENA_FILES.length?stage-base:-1}
 const femurDrawArena=function(){
  const slot=femurArenaSlotOverride!==null?femurArenaSlotOverride:femurSlotForStage(activeStage);
- // Later modules (campaign-arenas.js) reassign the global, so re-take it on every paint.
- if(window.drawArena!==femurDrawArena&&typeof window.drawArena==='function'){femurOuterDrawArena=window.drawArena;window.drawArena=femurDrawArena;}
+ // This adapter is loaded last; no render-time monkey patching.
  // Femur's stages are hers alone; everything else keeps the engine's own painter untouched.
  if(slot>=0&&slot<FEMUR_ARENA_FILES.length){drawFemurArena(slot);return}
  femurOriginalDrawArena();
@@ -199,10 +188,9 @@ function drawFemurArena(femurSlot){
   const dw=im.naturalWidth*scale,dh=im.naturalHeight*scale;
   ctx.drawImage(im,(W-dw)/2-camera,(H-dh)/2,dw,dh);
  }else{
-  // Art still decoding: the engine's own backdrop stays visible underneath.
-  return;
+  ctx.drawImage(stage,0,0);return;
  }
- ctx.save();ctx.strokeStyle='#f6e7b666';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(640,590,535,44,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+ // The main renderer already draws the roda outline.
 }
 
 /* ---------- 7. Route: Femur first-Celina, after Aisha, after androids ---------- */
@@ -210,50 +198,17 @@ function drawFemurArena(femurSlot){
 const FEMUR_STAGE_COUNT=FEMUR_ARENA_FILES.length;
 // The shipped roster already leaves a hole at index 17; Femur's five arenas start at 18.
 // Read the base from the live stage table each time: homeStages is rebuilt by the engine.
-function femurStageBase(){
- const found=homeStages.get(FEMUR_ID);
- if(typeof found==='number'&&found>FEMUR_ID)return found;
- const byName=stageNames.indexOf(FEMUR_ARENA_NAMES[0]);
- return byName>0?byName:FEMUR_STAGE_BASE;
-}
+function femurStageBase(){return FEMUR_STAGE_BASE;}
 function femurOwnStage(index){return femurStageBase()+(index%FEMUR_STAGE_COUNT)}
 // The engine lays out Femur's route itself now. This module only has to give her bout a stage
 // from her five arenas, because the engine's homeStageFor() maps her to a single home stage.
 const femurOriginalMakeArcade=makeArcade;
 makeArcade=function(){
  femurOriginalMakeArcade();
- const player=chosen[0];
- if(player===FEMUR_ID){
-  // Her own route: Celina first, then the school in the engine's own order.
-  const rest=arcadeOrder.filter(id=>id!==FEMUR_ID&&id!==CELINA_ID&&id!==player);
-  const route=[CELINA_ID,...rest];
-  arcadeOrder.length=0;route.forEach(id=>arcadeOrder.push(id));
- }else if(player!==AISHA_ID){
-  // Ordinary routes: Femur answers the whole school after Aisha has fallen, and closes the run.
-  const route=arcadeOrder.filter(id=>id!==FEMUR_ID&&id!==player);
-  const aishaAt=route.indexOf(AISHA_ID);
-  if(aishaAt>=0)route.splice(aishaAt+1,0,FEMUR_ID);else route.push(FEMUR_ID);
-  arcadeOrder.length=0;route.forEach(id=>arcadeOrder.push(id));
- }
- // Stage list follows the finished order, then Femur's own bout takes one of her five arenas.
- const stages=arcadeOrder.map((id,i)=>id===FEMUR_ID?femurOwnStage(player===FEMUR_ID?i:i):homeStageFor(id));
- arcadeStages.length=0;stages.forEach(x=>arcadeStages.push(x));
- arcadeIndex=0;chosen[1]=arcadeOrder[0];
+ if(chosen[0]===FEMUR_ID){arcadeStages.splice(0,arcadeStages.length,...arcadeOrder.map((_,i)=>femurOwnStage(i)));}
+ else {const at=arcadeOrder.indexOf(FEMUR_ID);if(at>=0)arcadeStages[at]=femurOwnStage(0);}
 };
-// Aisha's android run ends with Femur, not an android.
-const femurOriginalContinueAndroidRun=typeof continueAndroidRun==='function'?continueAndroidRun:null;
-if(femurOriginalContinueAndroidRun){
- continueAndroidRun=function(){
-  if(typeof androidWave!=='undefined'&&androidWave<ANDROID_LIMIT){femurOriginalContinueAndroidRun();return}
-  if(chosen[1]!==FEMUR_ID){
-   chosen[1]=FEMUR_ID;arcadeStages[arcadeStages.length-1]=femurOwnStage(arcadeStages.length);
-   activeStage=arcadeStages[arcadeStages.length-1];stageChoice=activeStage;
-   wins=[0,0];round=1;setRounds();startRound();openStory();return;
-  }
-  femurOriginalContinueAndroidRun();
- };
-}
-
+// Aisha's final-bout transition is handled directly in the corrected engine. No duplicate wrapper.
 /* ---------- 8. Comics ---------- */
 const FEMUR_SCRIPTS={};
 const FEMUR_FALLBACK_LINES={
@@ -310,7 +265,7 @@ function openFemurComic(key){
  storyEnding=false;storyPrologue=false;storyReturn='fight';scene='story';show('story');storyTime=arcadeAutoplay?1080:Infinity;
  const pages=femurComicPanels(key,opponentName);
  window.__femurArt=art;
- paintFemurComic(key==='femur_opening_celina'?'An Uninvited Challenger':key==='femur_victory'?'Femur Takes the Roda':key==='femur_defeat'?'The Roda Answers':key==='player_defeats_femur'?'The School Holds':key==='player_loses_to_femur'?'The School Holds, Barely':'One More Rival',
+ paintFemurComic(FEMUR_SCRIPTS[key]?.title||'Femur · The Rival',
   'Femur · RODA',key,pages);
  const femurArt=document.querySelector('#story .chapter-art');
  if(femurArt)femurArt.style.cssText='display:block;width:100%;max-width:1040px;height:auto;margin:0 auto 18px';
@@ -324,69 +279,73 @@ const femurOriginalOpenStory=openStory;
 openStory=function(ending){
  if(!ending){
   const key=femurComicKeyFor(chosen[1]);
-  if(key){applyFemurStage();openFemurComic(key);return}
+  if(key){openFemurComic(key);return}
   // Femur's route never shows the ordinary Celina interludes.
   if(chosen[0]===FEMUR_ID){storyReturn='fight';advanceStory();return}
  }
  femurOriginalOpenStory(ending);
 };
 
-/* ---------- 9. Result comics at match outcome ---------- */
-let femurResultComicShown=false;
-const femurOriginalShowResults=showResults;
-showResults=function(){
- femurOriginalShowResults();
- const involvesFemur=players.some(p=>p.id===FEMUR_ID);
- if(!involvesFemur||mode==='training')return;
- const routeComplete=arcadeIndex===arcadeOrder.length-1;
- const playerWon=matchWinner===0;
- let key=null;
- if(routeComplete)key=chosen[0]===FEMUR_ID?(playerWon?'femur_victory':'femur_defeat'):(playerWon?'player_defeats_femur':'player_loses_to_femur');
- if(!key)return;
- femurResultComicShown=true;
- const art=femurComics[key];
- const box=$('#roda-bout-record');
- if(box){box.dataset.femurComic=art?art.src:'';box.textContent=(box.textContent?box.textContent+' · ':'')+'FEMUR COMIC · A CONTINUES';}
-};
-
-/* ---------- 10. Alternate costume reward (persisted, route win only) ---------- */
-function applyFemurStage(){
- const slot=arcadeIndex!=null&&arcadeOrder.length?arcadeIndex:0;
- const want=chosen[0]===FEMUR_ID?femurOwnStage(slot):femurOwnStage(0);
- arcadeStages[slot]=want;activeStage=want;stageChoice=want;
-}
-let femurAltUnlocked=false;
-try{femurAltUnlocked=localStorage.getItem(COSTUME_KEY)==='1'}catch(e){}
+/* ---------- 9. Endings and earned costume eligibility ---------- */
+// The supplied alternate uniform art is not a complete playable costume. Record eligibility,
+// not a selectable unlock, until the full matching animation set is available.
+const EARNED_KEY='roda-femur-alt-angola-earned-v1';
+let femurAltEarned=false;
+try{femurAltEarned=localStorage.getItem(EARNED_KEY)==='1'}catch(e){}
 function grantFemurCostume(){
- if(chosen[0]!==FEMUR_ID||matchWinner!==0)return false;
- if(arcadeIndex!==arcadeOrder.length-1)return false;
- if(femurAltUnlocked)return false;
- femurAltUnlocked=true;try{localStorage.setItem(COSTUME_KEY,'1')}catch(e){}
- return true;
+ if(arcadeAutoplay||mode!=='solo'||chosen[0]!==FEMUR_ID||matchWinner!==0||arcadeIndex!==arcadeOrder.length-1||femurAltEarned)return false;
+ femurAltEarned=true;try{localStorage.setItem(EARNED_KEY,'1')}catch(e){}return true;
 }
-
+let femurEndingAction=null;
+const femurOriginalAdvanceStory=advanceStory;
+advanceStory=function(){
+ if(storyReturn==='femur-ending'&&femurEndingAction){const next=femurEndingAction;femurEndingAction=null;storyReturn='fight';next();return;}
+ return femurOriginalAdvanceStory.apply(this,arguments);
+};
+$('#storyadvance').onclick=()=>advanceStory();
+const femurOriginalAutoContinue=autoContinue;
+autoContinue=function(){
+ if(!matchOver||mode==='training')return femurOriginalAutoContinue.apply(this,arguments);
+ const selected=chosen[0]===FEMUR_ID, opposing=chosen[1]===FEMUR_ID;
+ const terminal=mode==='aisha'?opposing:arcadeIndex===arcadeOrder.length-1;
+ const won=matchWinner===0;
+ if((selected&&mode==='solo'&&(!won||terminal))||(opposing&&terminal&&(mode==='solo'||mode==='aisha'))){
+  const key=selected?(won?'femur_victory':'femur_defeat'):(won?'player_defeats_femur':'player_loses_to_femur');
+  if(selected&&won&&!arcadeAutoplay)grantFemurCostume();
+  femurEndingAction=()=>{if(mode==='aisha'){continueAndroidRun();return;}if(won&&!arcadeAutoplay){openArcadeScore();return;}returnToMenu();};
+  openFemurComic(key);storyReturn='femur-ending';$('#storyadvance').textContent='A · CONTINUE';
+  if(selected&&won)$('#storyrole').textContent='Campaign clear · alternate costume earned; playable costume artwork pending';
+  return;
+ }
+ return femurOriginalAutoContinue.apply(this,arguments);
+};
+const femurOriginalOpenComicEnding=openComicEnding;
+openComicEnding=function(){
+ if(mode==='solo'&&(chosen[0]===FEMUR_ID||chosen[1]===FEMUR_ID)&&arcadeIndex===arcadeOrder.length-1){
+  const key=chosen[0]===FEMUR_ID?(matchWinner===0?'femur_victory':'femur_defeat'):(matchWinner===0?'player_defeats_femur':'player_loses_to_femur');
+  femurEndingAction=()=>{if(arcadeAutoplay||matchWinner!==0)returnToMenu();else openArcadeScore();};
+  openFemurComic(key);storyReturn='femur-ending';$('#storyadvance').textContent='A · CONTINUE';return;
+ }
+ return femurOriginalOpenComicEnding.apply(this,arguments);
+};
 /* ---------- 11. Load scripts + clip images, then the rest of the engine ---------- */
-async function femurLoadAll(){
- const [manifest,scripts]=await Promise.all([
-  fetch(FEMUR_ROOT+'manifest.json').then(r=>r.json()),
-  fetch(FEMUR_ROOT+'comic-scripts.json').then(r=>r.json()).catch(()=>null)
- ]);
- if(scripts)Object.assign(FEMUR_SCRIPTS,scripts);
- const names=new Set(Object.keys(femurClipMeta));
- await Promise.all(Object.entries(manifest.clips).filter(([n])=>names.has(n)).map(([n,c])=>new Promise(res=>{
-  if(c.count&&femurClips[n])femurClips[n].count=c.count;
-  if(c.columns&&femurClips[n])femurClips[n].columns=c.columns;
-  const im=femurImages[n];
-  if(im.complete&&im.naturalWidth)return res();
-  im.onload=res;im.onerror=res;
- })));
- await Promise.all([femurPortrait,...Object.values(femurComics),...femurArenaImages].map(im=>new Promise(res=>{if(im.complete)return res();im.onload=res;im.onerror=res;})));
+let femurLoadPromise;
+function femurLoadAll(){
+ if(femurLoadPromise)return femurLoadPromise;
+ femurLoadPromise=(async()=>{
+  const [manifest,scripts]=await Promise.all([
+   fetch(FEMUR_ROOT+'manifest.json').then(r=>{if(!r.ok)throw new Error('Femur manifest HTTP '+r.status);return r.json();}),
+   fetch(FEMUR_ROOT+'comic-scripts.json').then(r=>{if(!r.ok)throw new Error('Femur comic scripts HTTP '+r.status);return r.json();})
+  ]);
+  Object.assign(FEMUR_SCRIPTS,scripts.comics||scripts);
+  for(const [n,c] of Object.entries(femurClipMeta)){const d=manifest.clips[n];if(!d||d.file!==c.file||d.columns!==c.columns||d.count!==c.count)throw new Error('Femur atlas manifest mismatch: '+n);}
+  await Promise.all([...Object.values(femurImages),femurPortrait,...Object.values(femurComics),...femurArenaImages].map(async im=>{if(!im.complete||!im.naturalWidth)await im.decode();if(!im.naturalWidth)throw new Error('Missing Femur image '+im.src);}));
+ })();return femurLoadPromise;
 }
 // Take over the arena painter now that every other module has had its say.
-if(typeof window.drawArena==='function'){femurOuterDrawArena=window.drawArena;window.drawArena=femurDrawArena;}
-// Live page loads this module from the same folder as the engine, so the package sits beside it.
+drawArena=femurDrawArena;
 window.RODAFemur={
- id:FEMUR_ID,stageBase:function(){return femurStageBase()},setArenaSlot:femurSetArenaSlot,arenaNames:FEMUR_ARENA_NAMES,altUnlocked:()=>femurAltUnlocked,grant:grantFemurCostume,
+ id:FEMUR_ID,stageBase:function(){return femurStageBase()},setArenaSlot:femurSetArenaSlot,arenaNames:FEMUR_ARENA_NAMES,altUnlocked:()=>false,altEarned:()=>femurAltEarned,grant:grantFemurCostume,
  stateClip:p=>femurState(p).clip,ready:()=>femurLoadAll(),comicKeys:FEMUR_COMIC_KEYS
 };
 })();

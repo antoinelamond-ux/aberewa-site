@@ -10,6 +10,11 @@ function validate(manifest){
  return manifest;
 }
 function frameIndex(clip,elapsedMs){const i=Math.floor(Math.max(0,finite(elapsedMs))/clip.frameMs);return clip.loop?i%clip.count:Math.min(clip.count-1,i);}
+function rollFrameIndex(clip,remainingTicks,totalTicks=24){
+ const duration=Math.max(1,finite(totalTicks,24));
+ const progress=1-clamp(finite(remainingTicks,duration)/duration,0,1);
+ return Math.min(clip.count-1,Math.floor(progress*clip.count));
+}
 function cell(manifest,name,index){const c=manifest.clips[name],f=manifest.frame,i=clamp(Math.floor(index),0,c.count-1);return {x:i%c.columns*f.width,y:Math.floor(i/c.columns)*f.height,w:f.width,h:f.height};}
 function stateClip(p){
  // State age is measured in milliseconds by caller. A state change resets the age.
@@ -71,10 +76,10 @@ async function load(baseUrl){
  const base=new URL(baseUrl,document.baseURI);const manifest=validate(await (await fetch(new URL('manifest.json',base))).json());const images={};
  await Promise.all(Object.entries(manifest.clips).map(([name,c])=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{images[name]=im;resolve();};im.onerror=()=>reject(Error('Cannot load Femur '+name));im.src=new URL(c.file,base).href;})));
  function draw(ctx,p,{x,groundY,scale=1,stateAgeMs=0,frameOverride}={}){
-  const name=stateClip(p),c=manifest.clips[name],i=frameOverride==null?frameIndex(c,stateAgeMs):frameOverride,r=cell(manifest,name,i),f=manifest.frame;
+  const name=stateClip(p),c=manifest.clips[name],i=frameOverride==null?((name==='roll_forward'||name==='roll_backward')&&Number.isFinite(p.rollTime)?rollFrameIndex(c,p.rollTime,p.rollDurationTicks||24):frameIndex(c,stateAgeMs)):frameOverride,r=cell(manifest,name,i),f=manifest.frame;
   ctx.save();ctx.translate(x,groundY);ctx.scale(p.dir<0?-scale:scale,scale);ctx.imageSmoothingEnabled=true;ctx.drawImage(images[name],r.x,r.y,r.w,r.h,-f.anchorX,-f.anchorY,r.w,r.h);ctx.restore();return {name,index:i};
  }
  return {manifest,images,draw,combatPlan:b=>combatPlan(manifest,b)};
 }
-const api={BUTTONS,validate,frameIndex,cell,stateClip,combatPlan,storyRoute,comicKey,femurArena,unlockCostume,load};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.RODAFemur=api;
+const api={BUTTONS,validate,frameIndex,rollFrameIndex,cell,stateClip,combatPlan,storyRoute,comicKey,femurArena,unlockCostume,load};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.RODAFemur=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -190,7 +190,7 @@ connectEightFighters();
 installAisha();
 installHeather();
 installCelina();
-const moveFor=(p,n)=>p.id===CELINA_ID?(p.attackCrouched&&n<6?celinaLowMoves[n]:characterMoves[p.id][n]):p.id===AISHA_ID&&p.attackCrouched?aishaLowMoves[n]:p.attackCrouched&&p.id!==HEATHER_ID&&p.id!==AISHA_ID&&p.id!==7&&p.id!==14&&!isProtagonist(p.id)?crouchingMove(characterMoves[p.id][n],n):characterMoves[p.id][n];
+const moveFor=(p,n)=>p.id===CELINA_ID?(p.attackCrouched&&n<6?celinaLowMoves[n]:characterMoves[p.id][n]):p.id===AISHA_ID&&p.attackCrouched?aishaLowMoves[n]:p.attackCrouched&&p.id!==HEATHER_ID&&p.id!==AISHA_ID&&p.id!==FEMUR_ID&&p.id!==7&&p.id!==14&&!isProtagonist(p.id)?crouchingMove(characterMoves[p.id][n],n):characterMoves[p.id][n];
 function crouchingMove(base,n){const key=n===1||n===4?'rasteira':n===3||n===5?'costas':'chapa';const tech=techniqueBook[key];const phases=[{...base.phases[0],...tech,visual:n===3||n===5?'lowback':'lowpush',level:'low',travel:0,frames:base.active,range:base.range*.9,damage:base.damage,knockdown:n>=2,push:3}];return {...base,...phases[0],phases,name:['Chapa baixa','Rasteira curta','Chapa baixa forte','Meia-lua baixa','Varredura','Contra-ataque baixo'][n],signature:n>=4?'BAIXA · '+base.signature:null,active:phases[0].frames,start:Math.max(4,base.start-1),crouching:true};}
 const ROUND_SECONDS=99;
 const playModes=['solo','training','watcharcade','aisha'];
@@ -205,7 +205,7 @@ function setRounds(value=roundLimit){
   button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));
  });
 }
-function roundLabel(){return mode==='aisha'?androidLabel()+' / '+ANDROID_LIMIT:roundLimit===1?'ONE ROUND':`ROUND ${round} · FIRST TO ${winsNeeded()}`;}
+function roundLabel(){return mode==='aisha'?(chosen[1]===FEMUR_ID?'FINAL RIVAL · FEMUR':androidLabel()+' / '+ANDROID_LIMIT):roundLimit===1?'ONE ROUND':`ROUND ${round} · FIRST TO ${winsNeeded()}`;}
 function visualHeight(id){return fighterTraits[id].height/174;}
 
 let arcadeOrder=[],arcadeIndex=0,matchWinner=-1,resultTime=0,resumeScene='fight';
@@ -214,19 +214,14 @@ function arcadeOpponents(playerId){
 }
 const FEMUR_ID=17;
 function buildCelinaArcadeOrder(player,rotate=true){
- // Femur: Celina opens her route, and she answers every ordinary route after Aisha.
- if(player===FEMUR_ID){
-  const rest=arcadeOpponents(player).filter(id=>id!==CELINA_ID);
-  return [CELINA_ID,...rest];
- }
+ if(player===FEMUR_ID){return [CELINA_ID,...arcadeOpponents(player).filter(id=>id!==CELINA_ID&&id!==FEMUR_ID)];}
  const final=player===AISHA_ID?14:AISHA_ID;
  const closing=[11,13].filter(id=>id!==player);
- const early=arcadeOpponents(player).filter(id=>id!==final&&!closing.includes(id));
+ const early=arcadeOpponents(player).filter(id=>id!==FEMUR_ID&&id!==final&&!closing.includes(id));
  const start=rotate?Math.floor(Math.random()*early.length):0;
  const regular=early.slice(start).concat(early.slice(0,start),closing);
  const route=[];regular.forEach((id,i)=>{route.push(id);if(player!==CELINA_ID&&(i+1)%2===0)route.push(CELINA_ID);});
- route.push(final);
- return route;
+ route.push(final,FEMUR_ID);return route;
 }
 function makeArcade(){
  resetArcadeScore();
@@ -265,13 +260,13 @@ function beginAndroidRun(){
  chosen=[AISHA_ID,AISHA_ID];startRound();
 }
 function continueAndroidRun(){
- if(matchWinner===0 && androidWave<ANDROID_LIMIT){
-  androidWave++;wins=[0,0];round=1;startRound();return;
+ if(matchWinner===0 && chosen[1]!==FEMUR_ID){
+  if(androidWave<ANDROID_LIMIT){androidWave++;wins=[0,0];round=1;startRound();return;}
+  chosen[1]=FEMUR_ID;wins=[0,0];round=1;startRound();openStory();return;
  }
  saveAndroidOutcome();
  scene='watchcomplete';show(null);showAndroidOutcome();
- const panel=$('#watchcomplete');
- panel.hidden=false;
+ const panel=$('#watchcomplete');panel.hidden=false;
 }
 function choose(){stopResultSound();if(!loaded){$('#padhelp').textContent='Loading fighter artwork…';return}if(mode==='aisha'){beginAndroidRun();return}if(mode==='watcharcade'){mode='solo';arcadeAutoplay=true;}scene='select';pickStage=0;pick=chosen[0];show('select');updatePick()}
 $('#choose').onclick=choose;$('#backmenu').onclick=()=>{scene='menu';show('menu')};$('#confirm').onclick=confirmPick;
@@ -315,10 +310,10 @@ function startRound(){
  setRounds();firstHitClaimed=false;roundRewarded=false;roundIntro=true;stopResultSound();musicCommand('setVolume',[35]);
  if(typeof localMusic!=='undefined'&&localMusic)localMusic.volume=.32;
  $('#restart').textContent=mode==='solo'?'RESTART ARCADE RUN':mode==='aisha'?'RESTART AISHA MODE':'RESTART MATCH';$('#resume').classList.remove('hidden');
- activeStage=mode==='aisha'?homeStageFor(AISHA_ID):mode==='solo'?(arcadeStages[arcadeIndex]??DEFAULT_STAGE):stageChoice;
+ activeStage=mode==='aisha'?homeStageFor(chosen[1]===FEMUR_ID?FEMUR_ID:AISHA_ID):mode==='solo'?(arcadeStages[arcadeIndex]??DEFAULT_STAGE):stageChoice;
  if(activeStage<0||activeStage>=stageNames.length)activeStage=DEFAULT_STAGE;
  setStageMusic(activeStage);players=[fighter(chosen[0],390,1),fighter(chosen[1],890,-1)];
- if(mode==='aisha'){
+ if(mode==='aisha'&&chosen[1]!==FEMUR_ID){
   players[1].android=true;
   players[1].unitNumber=androidWave;
   androidSheet(androidWave);
@@ -441,7 +436,7 @@ function updateRoll(p,input,dt){
  const ready=!inJump(p)&&p.attack===null&&p.stun<=0&&p.down<=0&&p.hp>0;
  // Celina begins a complete grounded roll on held horizontal input.
  // Down + away and holding away against an incoming attack retain guard.
- if(p.id===CELINA_ID&&ready&&direction&&!(p.rollTime>0)&&!(input.y>.5)&&!(input.y<-.5)
+ if((p.id===CELINA_ID||p.id===FEMUR_ID)&&ready&&direction&&!(p.rollTime>0)&&!(input.y>.5)&&!(input.y<-.5)
     &&!(direction===-p.dir&&players.find(other=>other!==p)?.attack!=null)){
   p.rollTime=24;p.rollDirection=direction;p.buffer=null;p.jumpBuffer=0;
  }
@@ -455,7 +450,7 @@ function updateRoll(p,input,dt){
  p.x=clamp(p.x+p.rollDirection*5*dt,100,1180);p.vx=0;p.crouch=true;p.block=false;
  p.moveText=p.dir===p.rollDirection?'FORWARD ROLL':'BACKWARD ROLL';
  p.rollTime=Math.max(0,p.rollTime-dt);
- if(p.id===CELINA_ID&&!p.rollTime)p.crouch=false;
+ if((p.id===CELINA_ID||p.id===FEMUR_ID)&&!p.rollTime)p.crouch=false;
  return true;
 }
 // Source-head scale in each eight-frame row, measured against the upright
@@ -547,6 +542,7 @@ function strikeInReach(p,opp,m){
  let reach=m.range;
  let open=p.id===AISHA_ID?2:0,close=7;
  if(p.id===CELINA_ID&&m.art){open=m.contact*m.frames/m.art.length;close=(m.contact+1)*m.frames/m.art.length;}
+ if(p.id===FEMUR_ID){open=m.contactFrame;close=m.contactFrame+1;}
  if(opp.android && p.id===AISHA_ID){
   // The unit's front hurtbox extends beyond its ground anchor. Match the
   // contact window to the painted kick, and keep the normal close-range reach.
@@ -560,7 +556,7 @@ function updateFighter(p,opp,s,dt){if(updateRoll(p,s,dt))return;if(p.fallSoundAt
 if(p.attack!==null){let base=moveFor(p,p.attack);p.at+=dt;let m=attackPhase(base,p.at);if(p.phase!==m.phase){p.phase=m.phase;p.hit=false;p.swingPlayed=false}let active=p.at>=m.start&&p.at<m.start+m.active;if(active&&!p.swingPlayed){p.swingPlayed=true;sfx('swing',m.rank)}
 if(p.y>0&&s){p.vx+=(s.x*fighterTraits[p.id].speed-p.vx)*.16;p.x+=p.vx*dt};if(p.y===0){if(p.at<m.start)p.x+=p.dir*(base.retreat||0)*dt;else if(active)p.x+=p.dir*m.travel*dt;}
 if(active&&!p.hit&&strikeInReach(p,opp,m)&&Math.abs(opp.y-p.y)<110&&opp.down<=0&&opp.invuln<=0){p.hit=true;let avoids=opp.crouch&&m.level==='high';if(avoids){tone(220,.06,.03)}else{p.confirmed=true;let blocked=opp.block&&(m.level!=='low'||opp.crouch);if(blocked){opp.stun=7;opp.guardStun=true;opp.meter=Math.min(100,opp.meter+5);p.meter=Math.min(100,p.meter+3);opp.moveText='BLOCK';burst((p.x+opp.x)/2,opp.crouch?505:405,'#c9f9ff',9);sfx('block',m.rank);rumble(players.indexOf(opp),.14,60)}else{let dmg=p.id===CELINA_ID&&m.powerKick?opp.maxHp*.25:p.id===AISHA_ID?opp.maxHp*(p.android ? .01 : .02):m.damage*Math.max(.55,1-p.combo*.1);if(p.android)dmg*=1+p.strengthBonus/100;let actualDamage=Math.min(opp.hp,dmg);opp.hp=Math.max(0,opp.hp-dmg);scoreContact(p,opp,actualDamage);opp.stun=m.rank===3?33:24;opp.guardStun=false;opp.flash=8;opp.attack=null;opp.buffer=null;p.combo++;p.comboTimer=80;p.meter=Math.min(100,p.meter+8);opp.meter=Math.min(100,opp.meter+6);opp.pushV=p.dir*m.push;opp.hitAt=tick;opp.reaction=m.level==='high'?4:1;opp.impactKind=m.level;if(m.knockdown||opp.hp<=0){opp.down=opp.hp<=0?999: m.rank===3?52:40;opp.comboTimer=0;opp.fallSoundAt=tick+8}rumble(players.indexOf(opp),m.rank===3?.55:.3,90);if(mode!=='aisha'||m.phase===base.phases.length-1)shake=m.rank===3?10:5;freeze=m.rank===3?4:2;burst((p.x+opp.x)/2,m.level==='low'?530:m.level==='high'?590-270*fighterTraits[opp.id].height/174:410,m.rank===3?fighterTraits[p.id].accent:'#ffe999',m.rank===3?36:18);sfx('hit',m.rank);vocal(opp.id,opp.hp<=0?'defeat':'hit')}}}
-let cancel=p.id!==CELINA_ID&&p.id!==HEATHER_ID&&p.id!==AISHA_ID&&(p.confirmed||p.at>=m.start+m.active+2)&&p.at>=m.start+Math.max(2,m.active*.3)&&p.buffer&&(moveFor(p,p.buffer.n).rank>m.rank||(p.combo<3&&p.buffer.n!==p.attack&&moveFor(p,p.buffer.n).rank===m.rank));
+let cancel=p.id!==CELINA_ID&&p.id!==HEATHER_ID&&p.id!==AISHA_ID&&p.id!==FEMUR_ID&&(p.confirmed||p.at>=m.start+m.active+2)&&p.at>=m.start+Math.max(2,m.active*.3)&&p.buffer&&(moveFor(p,p.buffer.n).rank>m.rank||(p.combo<3&&p.buffer.n!==p.attack&&moveFor(p,p.buffer.n).rank===m.rank));
 if(cancel||p.at>=m.start+m.active+m.end){p.attack=null;if(p.buffer){let queued=p.buffer;p.buffer=null;beginAttack(p,queued.n,queued.crouched)}}
 }else{p.crouch=p.y<=0&&s?.y>.5;p.block=!!s&&(s.guard===true||s.x*p.dir<-.35)&&p.y<=0;if(p.crouch)p.vx=0;if(!p.crouch&&s){let target=s.x*(p.block&&opp.attack!==null?2.7:fighterTraits[p.id].speed);p.vx+=(target-p.vx)*(p.y>0?.16:.62);if((!s.x&&!inJump(p))||Math.abs(p.vx)<.03)p.vx=0;p.x+=p.vx*dt}if(p.jumpBuffer>0&&p.y<=0&&p.takeoff<=0){p.buffer=null;p.takeoff=3;p.jumpBuffer=0;p.crouch=false;p.block=false}p.moveText=p.crouch?(p.block?'LOW GUARD':'ESQUIVA'):p.block?'GUARD':'GINGA';if(p.buffer){let queued=p.buffer;p.buffer=null;beginAttack(p,queued.n,queued.crouched)}}
 advanceAir(p,dt);p.x=clamp(p.x,100,1180);
@@ -594,21 +590,21 @@ function androidInput(p,opp,dt){
  }
  return {x:0,y:0};
 }
-function ai(p,opp,dt){if(p.android)return androidInput(p,opp,dt);if(mode==='training'){if(trainingDummy===1)return{x:-p.dir,y:0};if(trainingDummy===2)return{x:-p.dir,y:1};return{x:0,y:0}}p.aiWait-=dt;let dist=Math.abs(p.x-opp.x),normal=difficulty==='normal';let s={x:dist>155?p.dir*(normal?.85:.6):0,y:0};if(opp.attack!==null&&dist<250&&normal&&p.aiWait<20){s.x=-p.dir;s.y=moveFor(opp,opp.attack).level==='low'?1:0}if(p.aiWait<=0){p.aiWait=normal?24+Math.random()*26:55+Math.random()*65;if(dist<255&&Math.random()<(normal?.9:.65)){let n=p.id===CELINA_ID?Math.floor(Math.random()*(p.meter>=50?8:6)):Math.floor(Math.random()*(p.id===7||p.meter>=50?6:4));requestAttack(p,n,p.id===CELINA_ID&&n<6&&Math.random()<.3)}else if(dist<160)s.x=-p.dir}return s}
+function ai(p,opp,dt){if(p.android)return androidInput(p,opp,dt);if(mode==='training'){if(trainingDummy===1)return{x:-p.dir,y:0};if(trainingDummy===2)return{x:-p.dir,y:1};return{x:0,y:0}}p.aiWait-=dt;let dist=Math.abs(p.x-opp.x),normal=difficulty==='normal';let s={x:dist>155?p.dir*(normal?.85:.6):0,y:0};if(opp.attack!==null&&dist<250&&normal&&p.aiWait<20){s.x=-p.dir;s.y=moveFor(opp,opp.attack).level==='low'?1:0}if(p.aiWait<=0){p.aiWait=normal?24+Math.random()*26:55+Math.random()*65;if(dist<255&&Math.random()<(normal?.9:.65)){let n=p.id===CELINA_ID?Math.floor(Math.random()*(p.meter>=50?8:6)):Math.floor(Math.random()*(p.id===7||p.id===FEMUR_ID||p.meter>=50?6:4));requestAttack(p,n,p.id===CELINA_ID&&n<6&&Math.random()<.3)}else if(dist<160)s.x=-p.dir}return s}
 function finishRound(){
  const health=players.map(p=>p.hp/p.maxHp);
  const win=Math.abs(health[0]-health[1])<1e-9?-1:health[0]>health[1]?0:1;
  if(win>=0){wins[win]++;scoreRound(win);}
  matchOver=win>=0&&wins[win]>=winsNeeded();matchWinner=win;roundIntro=false;
  if(matchOver)recordNamedBout();
- if(mode==='aisha'&&matchOver&&(win===1||androidWave===ANDROID_LIMIT))saveAndroidOutcome();
+ if(mode==='aisha'&&matchOver&&(win===1||chosen[1]===FEMUR_ID))saveAndroidOutcome();
  announcement=win<0?'DRAW · REPLAY ROUND':matchOver?(mode==='solo'&&win===0&&arcadeIndex===arcadeOrder.length-1?'RODA CHAMPION!':(players[win].android?androidLabel():roster[players[win].id][0].toUpperCase())+' WINS!'):(players.some(p=>p.hp<=0)?'K.O.':'TIME UP');
  announceTime=180;endWait=180;
 }
 function update(dt,states){
  if(scene==='story'){storyTime-=dt;if(storyTime<=0)advanceStory();return;}
  if(scene==='result'){resultTime-=dt;if(resultTime<=0){
-   if(mode==='solo'&&chosen[1]===HEATHER_ID)openHeatherComic(true);
+   if(mode==='solo'&&chosen[0]!==FEMUR_ID&&chosen[1]===HEATHER_ID)openHeatherComic(true);
    else autoContinue();
   }return;}
  if(scene!=='fight')return;
@@ -843,7 +839,7 @@ async function loadFighterImage(image) {
  }
 }
 installRecordUI();
-Promise.all([celinaImage,celinaMovement,celinaCard,heatherArt,heatherWhiteArt,groundRollArt,aishaArt,aishaMirrorArt,meilinRetreatArt,retreatArt,...Object.values(gingaImagesV26),...Object.values(defeatImages),...Object.values(redesignImages),...privateArenaImages,...normalSequenceImages,...specialImages,...Object.values(leanMestreImages),...bencaoImages,...turnImages,highHitImage,...motionImages,...atlases,bossImage,...reactionImages,...transitionImages,bossExtra,...arenaImages,musicianImage].map(loadFighterImage)).then(()=>{loaded=true;roster.forEach((f,i)=>{let b=document.createElement('button');b.className='fightercard';b.setAttribute('aria-label',f[0]);let c=document.createElement('canvas');c.width=300;c.height=200;b.append(c);facePortrait(c,i);let span=document.createElement('span');span.textContent=f[0].toUpperCase();b.append(span);b.onclick=()=>{pick=i;updatePick()};$('#roster').append(b)});rosterBuilt=true;updatePick()}).catch(error=>{console.error('RODA artwork or selection:',error);$('#padhelp').textContent='Could not prepare the roster: '+error.message;});
+Promise.all([celinaImage,celinaMovement,celinaCard,heatherArt,heatherWhiteArt,groundRollArt,aishaArt,aishaMirrorArt,meilinRetreatArt,retreatArt,...Object.values(gingaImagesV26),...Object.values(defeatImages),...Object.values(redesignImages),...privateArenaImages,...normalSequenceImages,...specialImages,...Object.values(leanMestreImages),...bencaoImages,...turnImages,highHitImage,...motionImages,...atlases,bossImage,...reactionImages,...transitionImages,bossExtra,...arenaImages,musicianImage].map(loadFighterImage)).then(()=>new Promise(resolve=>{if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',resolve,{once:true});else resolve();})).then(()=>{if(!window.RODAFemur)throw new Error('Femur integration must load after the existing game modules');return window.RODAFemur.ready();}).then(()=>{loaded=true;roster.forEach((f,i)=>{let b=document.createElement('button');b.className='fightercard';b.setAttribute('aria-label',f[0]);let c=document.createElement('canvas');c.width=300;c.height=200;b.append(c);facePortrait(c,i);let span=document.createElement('span');span.textContent=f[0].toUpperCase();b.append(span);b.onclick=()=>{pick=i;updatePick()};$('#roster').append(b)});rosterBuilt=true;updatePick()}).catch(error=>{console.error('RODA artwork or selection:',error);$('#padhelp').textContent='Could not prepare the roster: '+error.message;});
 buildStage();requestAnimationFrame(frame);
 
 function drawArena(){if(activeStage>=18){drawPrivateArena();return}let image=arenaImages[Math.floor(activeStage/6)],cell=activeStage%6;let camera=players.length&&scene==='fight'?clamp(((players[0].x+players[1].x)/2-640)*.025,-12,12):Math.sin(tick*.002)*4;if(image.complete&&image.naturalWidth){let aw=image.width/2,ah=image.height/3;ctx.drawImage(image,(cell%2)*aw,Math.floor(cell/2)*ah,aw,ah,-16-camera,-8,W+32,H+16)}else ctx.drawImage(stage,0,0);
@@ -904,11 +900,11 @@ function boutProfile(p){
  return p.android?{name:androidLabel(),home:'Sentinel Studio 2323',win:'Relay complete.',lose:'Unit offline.'}:profiles[p.id];
 }
 function showResults(){recordNamedBout();renderNamedRecords();scene='result';resultTime=300;show('result');let wi=matchWinner<0?0:matchWinner,li=1-wi,w=boutProfile(players[wi]),l=boutProfile(players[li]);$('#resulttitle').textContent=mode==='solo'&&wi===0&&arcadeIndex===arcadeOrder.length-1?'RODA CHAMPION':w.name.toUpperCase()+' WINS';$('#winnername').textContent=w.name;$('#winnerhome').textContent=w.home;$('#winnerquote').textContent='“'+w.win+'”';$('#losername').textContent=l.name;$('#loserhome').textContent=l.home;$('#loserquote').textContent='“'+l.lose+'”';showResultCard('winner',players[wi].id,players[wi].whiteUniform);showResultCard('loser',players[li].id,players[li].whiteUniform);
- if(mode==='aisha'){
+ if(mode==='aisha'&&players[1]?.android){
   const card=$(wi===1?'#winnerportrait':'#loserportrait');
   card.src='androids/card-'+androidWave+'.webp';card.alt=androidLabel()+' fighter card';
  }
- if(mode==='solo'&&chosen[1]===CELINA_ID){const mentorIndex=arcadeOrder.slice(0,arcadeIndex).filter(id=>id===CELINA_ID).length;const slot=wi===1?'winner':'loser';$('#'+slot+'quote').textContent='“'+celinaAdvice(mentorIndex,wi===0)+'”';const portrait=$('#'+slot+'portrait');portrait.src=CELINA_ASSET_ROOT+'wisdom-'+(1+mentorIndex%6)+'.webp';portrait.alt='Celina offers advice';resultTime=arcadeAutoplay?540:Infinity; if(!arcadeAutoplay)$('#resulttitle').textContent+=' · A TO CONTINUE';}
+ if(mode==='solo'&&chosen[0]!==FEMUR_ID&&chosen[1]===CELINA_ID){const mentorIndex=arcadeOrder.slice(0,arcadeIndex).filter(id=>id===CELINA_ID).length;const slot=wi===1?'winner':'loser';$('#'+slot+'quote').textContent='“'+celinaAdvice(mentorIndex,wi===0)+'”';const portrait=$('#'+slot+'portrait');portrait.src=CELINA_ASSET_ROOT+'wisdom-'+(1+mentorIndex%6)+'.webp';portrait.alt='Celina offers advice';resultTime=arcadeAutoplay?540:Infinity; if(!arcadeAutoplay)$('#resulttitle').textContent+=' · A TO CONTINUE';}
  if(mode!=='solo'||arcadeAutoplay)$('#roda-bout-record').textContent='';
  $('#resume').classList.remove('hidden');$('#restart').textContent=mode==='solo'?'RESTART ARCADE RUN':mode==='aisha'?'RESTART AISHA MODE':'RESTART MATCH';stopResultSound();resultSound=playSample((mode==='solo'||mode==='aisha')&&wi===1?'defeat':'victory',.65);musicCommand('setVolume',[12]);if(localMusic)localMusic.volume=.15}
 function restartWatchArcade(){
