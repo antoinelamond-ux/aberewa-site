@@ -173,7 +173,7 @@ if (typeof ResizeObserver === 'function') {
  window.addEventListener('resize', fitCanvas);
  fitCanvas();
 }
-const roster=[['Dandara','The rhythm keeper'],['Jurema','Braided thunder'],['Celina','Forty years of Capoeira Angola'],['Zinga','The fearless flame'],['Lua','Moonlit malícia'],['Iara','The flowing tide'],['Nala','Quiet lightning'],['Meilin','The gilded low guard'],['Femur','Blue horizon'],['Sol','The golden hour'],['Ayana','The white braid'],['Bento','The steady mountain'],,['Nestor','The old fox'],['Mestre Maré','Mestre • all hard kicks • +10% health'],['Aisha','Sentinel of 2323'],['Heather','Oakland to Bahia']];
+const roster=[['Dandara','The rhythm keeper'],['Jurema','Braided thunder'],['Celina','Forty years of Capoeira Angola'],['Zinga','The fearless flame'],['Lua','Moonlit malícia'],['Iara','The flowing tide'],['Nala','Quiet lightning'],['Meilin','The gilded low guard'],['Sol','The golden hour'],['Ayana','The white braid'],['Bento','The steady mountain'],,['Nestor','The old fox'],['Mestre Maré','Mestre • all hard kicks • +10% health'],['Aisha','Sentinel of 2323'],['Heather','Oakland to Bahia']];
 // Sprite sheets and saved ranks use stable fighter IDs.
 const playableIds=Object.freeze(roster.flatMap((fighter,id)=>fighter?[id]:[]));
 function nextFighter(id,offset){
@@ -193,7 +193,7 @@ installCelina();
 const moveFor=(p,n)=>p.id===CELINA_ID?(p.attackCrouched&&n<6?celinaLowMoves[n]:characterMoves[p.id][n]):p.id===AISHA_ID&&p.attackCrouched?aishaLowMoves[n]:p.attackCrouched&&p.id!==HEATHER_ID&&p.id!==AISHA_ID&&p.id!==FEMUR_ID&&p.id!==7&&p.id!==14&&!isProtagonist(p.id)?crouchingMove(characterMoves[p.id][n],n):characterMoves[p.id][n];
 function crouchingMove(base,n){const key=n===1||n===4?'rasteira':n===3||n===5?'costas':'chapa';const tech=techniqueBook[key];const phases=[{...base.phases[0],...tech,visual:n===3||n===5?'lowback':'lowpush',level:'low',travel:0,frames:base.active,range:base.range*.9,damage:base.damage,knockdown:n>=2,push:3}];return {...base,...phases[0],phases,name:['Chapa baixa','Rasteira curta','Chapa baixa forte','Meia-lua baixa','Varredura','Contra-ataque baixo'][n],signature:n>=4?'BAIXA · '+base.signature:null,active:phases[0].frames,start:Math.max(4,base.start-1),crouching:true};}
 const ROUND_SECONDS=99;
-const playModes=['solo','training','watcharcade','aisha'];
+const playModes=['solo','training','watcharcade'];
 let roundLimit=5,suddenDeath=false,introDuration=0;
 function winsNeeded(){return mode==='aisha'?1:roundLimit===1?1:3}
 function formatLabel(){return roundLimit===1?'ONE ROUND':'BEST OF FIVE'}
@@ -221,7 +221,7 @@ function buildCelinaArcadeOrder(player,rotate=true){
  const start=rotate?Math.floor(Math.random()*early.length):0;
  const regular=early.slice(start).concat(early.slice(0,start),closing);
  const route=[];regular.forEach((id,i)=>{route.push(id);if(player!==CELINA_ID&&(i+1)%2===0)route.push(CELINA_ID);});
- route.push(final,FEMUR_ID);return route;
+ route.push(final);return route;
 }
 function makeArcade(){
  resetArcadeScore();
@@ -260,9 +260,8 @@ function beginAndroidRun(){
  chosen=[AISHA_ID,AISHA_ID];startRound();
 }
 function continueAndroidRun(){
- if(matchWinner===0 && chosen[1]!==FEMUR_ID){
-  if(androidWave<ANDROID_LIMIT){androidWave++;wins=[0,0];round=1;startRound();return;}
-  chosen[1]=FEMUR_ID;wins=[0,0];round=1;startRound();openStory();return;
+ if(matchWinner===0){
+  androidWave++;wins=[0,0];round=1;startRound();return;
  }
  saveAndroidOutcome();
  scene='watchcomplete';show(null);showAndroidOutcome();
@@ -879,7 +878,7 @@ $('#titlesetup').onclick=openSetup;
 $('#nextarena').onclick=()=>{stageChoice=(stageChoice+1)%stageNames.length;activeStage=stageChoice;updatePick()};
 window.addEventListener('pointerdown',()=>{if(sound)initAudio()},{once:true});
 show('title');
-const portraitImages=["dandara", "jurema", "celina", "zinga", "lua", "iara", "nala", "meilin-v24", "jaci", "sol-v24", "ayana", "bento",  , "nestor", "mestre-mare", "aisha", "heather"].map(slug=>{if(slug==='celina')return celinaCard;let im=new Image();const base=slug.replace('-v24','');im.src=["jaci", "jurema", "lua", "nala", "mestre-mare", "sol", "meilin", "nestor", "zinga"].includes(base)?'portraits/'+base+'-card-v25.jpg':'portraits/'+slug+'.webp';return im});
+const portraitImages=["dandara", "jurema", "celina", "zinga", "lua", "iara", "nala", "meilin-v24", , "sol-v24", "ayana", "bento", , , "nestor", "mestre-mare", "aisha", "heather"].map(slug=>{if(slug==='celina')return celinaCard;let im=new Image();const base=slug.replace('-v24','');im.src=["jaci", "jurema", "lua", "nala", "mestre-mare", "sol", "meilin", "nestor", "zinga"].includes(base)?'portraits/'+base+'-card-v25.jpg':'portraits/'+slug+'.webp';return im});
 // A held rear-foot ginga base while idle; feet never move with the breath.
 function drawGinga(p){
  if(p.id===9){drawRedesignFrame(p,1);return;}
@@ -936,6 +935,7 @@ heatherWhiteCard.src='portraits/heather-white.webp';
 const selectFaceBounds={"2":[76,37,39],"0": [75, 40, 41], "1": [76, 38, 39], "3": [75, 36, 40], "4": [76, 40, 40], "5": [76, 38, 42], "6": [73, 39, 40], "7": [81, 73, 46], "8": [73, 36, 42], "9": [83, 49, 43], "10": [76, 32, 41], "11": [76, 31, 41], "13": [73, 32, 42], "14": [75, 32, 42], "15": [75, 68, 128], "16": [79, 50, 45]};
 function facePortrait(c,id){
  const im=id===HEATHER_ID&&heatherWhiteSelected?heatherWhiteCard:portraitImages[id];
+ if(!im)return;
  if(!im.complete||!im.naturalWidth){im.addEventListener('load',()=>facePortrait(c,id),{once:true});return}
  const [x,y,span]=selectFaceBounds[id];
  const sw=im.naturalWidth*span/152,sh=sw*2/3;
