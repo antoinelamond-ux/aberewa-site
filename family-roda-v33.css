@@ -1,0 +1,41 @@
+/* Original cabinet and character art; Meilin's garden is the default. */
+#title{background:linear-gradient(90deg,rgba(7,20,16,.92),rgba(7,20,16,.38) 64%,rgba(7,20,16,.08)),url('comic/courtyard.jpg') center/cover}
+#menu{background:linear-gradient(90deg,rgba(8,20,15,.93),rgba(8,20,15,.80)),url('comic/courtyard.jpg') center/cover}
+.title-content{width:57%;max-width:650px}.title-content .story-premise{font-size:clamp(13px,1.15vw,16px);line-height:1.5}.title-content h2{font-size:clamp(64px,9vw,125px)}
+#entermenu{margin:12px 0 6px}.titlehelp,.audiohint{font-size:12px}.titlecounts{font-size:11px;line-height:1.5}
+.round-options{display:flex;flex-direction:column;gap:5px;padding:10px 0}.round-options strong{font-size:15px;color:#f4d174}.round-options small{font-size:12px}
+#replayintro{margin-top:9px}#story{padding:18px 22px;gap:12px;justify-content:flex-start;overflow:auto;background:#0c1917}
+.story-heading{flex:0 0 auto}.story-heading h2{font-size:clamp(22px,2.6vw,36px);margin:0}.story-heading>p:last-child{font-size:13px}.story-heading .eyebrow{font-size:11px}
+.family-comic{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;flex:1 1 auto;min-height:0}
+.family-comic .comic-panel{border:2px solid #d9bc73;background:#eee2bd;box-shadow:3px 3px 0 #000;min-width:0}
+.family-art{position:relative;aspect-ratio:auto;height:260px;min-height:175px;flex:1 1 auto;overflow:hidden;background:#15271e!important;display:flex}
+.family-art>img{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;object-position:center 33%;display:block}
+.family-may>img{object-position:center 32%;transform:scale(1.16)}.family-vovo>img{object-position:center 26%;transform:scale(1.16)}
+.family-together>img{position:relative;width:50%;height:100%;object-position:center 25%;object-fit:cover}
+.family-garden>img,.family-hall>img{object-position:50% 50%}
+.family-speech{position:absolute;z-index:1;left:8px;right:8px;bottom:9px;padding:9px 10px;border:2px solid #1b2420;border-radius:10px;background:#fff9e9;color:#19231c;box-shadow:2px 3px 0 #0006;font-size:clamp(11px,1.1vw,15px);line-height:1.25}
+.family-speech strong{display:block;font-size:10px;letter-spacing:.1em;color:#7b4824;margin-bottom:3px}.family-speech span{display:block}
+.family-comic .comic-panel>p{padding:9px 10px;font-size:clamp(11px,1.02vw,14px);line-height:1.4;flex:0 0 auto;min-height:120px}
+.comic-panel>p>strong{display:block;margin-bottom:5px;font-size:11px;letter-spacing:.07em;color:#76501c}.comic-panel>p>span{display:block}
+.story-bottom{display:flex;gap:20px;align-items:center;justify-content:space-between;flex:0 0 auto}.story-rival{display:flex;align-items:center}.story-rival h3{font-size:16px;color:#e5c57e;margin:0 0 4px}.story-rival p{font-size:12px;margin:0;color:#c5cdbf}.story-controls{width:auto;gap:12px;flex-wrap:wrap;justify-content:flex-end}.story-controls span{font-size:10px}.story-controls button{font-size:13px;padding:12px 15px}
+#storyportrait{display:none!important}
+#result{background:#0d1c18f5}.result-grid{max-width:720px;width:100%;margin:0 auto;grid-template-columns:1fr 1fr;gap:16px}.result-grid article{padding:18px;background:#182d25;border:1px solid #8c743f}.result-grid h3{font-size:26px}.result-grid blockquote{display:none}.result-grid .eyebrow{font-size:11px}.result-grid p{font-size:14px}.result-head h2{font-size:clamp(28px,4vw,54px)}.continue-note{font-size:13px}
+#ending{background:#0c1815f9;overflow:auto;padding:18px;display:flex;align-items:center;justify-content:center}.ending-layout{max-width:880px;width:100%;margin:auto;text-align:center}.ending-layout h2{font-size:25px;color:#f0cc77;margin:3px 0 10px}.ending-layout .eyebrow{font-size:12px;margin:0 0 5px}#endingimage{display:block;margin:auto;max-width:100%;width:auto;height:340px;object-fit:contain;border:2px solid #bfa368;background:#15251b}#endingcaption{max-width:750px;margin:12px auto;font-size:16px;line-height:1.45;color:#fff0cf}.ending-actions{display:flex;justify-content:center;gap:10px}.ending-actions button{font-size:13px}.ending-help{font-size:12px;color:#bac6b3}
+@media(max-width:900px){#story{padding:12px}.family-art{height:190px;min-height:160px}.family-comic .comic-panel>p{font-size:11px;min-height:132px}.family-speech{font-size:11px;padding:6px}.story-heading>p:last-child{font-size:11px}.story-bottom{gap:10px}.story-rival h3{font-size:13px}.story-controls span{display:none}#endingimage{height:280px}}
+@media(max-width:650px){.title-content{width:90%}.family-comic{grid-template-columns:repeat(2,minmax(0,1fr));flex:0 0 auto}.family-art{height:220px}.family-comic .comic-panel>p{font-size:12px;min-height:115px}.family-speech{font-size:12px}.story-bottom{flex-wrap:wrap}.story-controls{justify-content:flex-start}.story-heading{display:block}.story-heading h2{font-size:23px}#endingimage{height:260px}.ending-layout h2{font-size:21px}#endingcaption{font-size:14px}}
+#watchcomplete[hidden]{display:none}#watchcomplete{background:#131b17;color:#ffdd94}
+.family-comic .comic-panel>p:has(>strong:empty):has(>span:empty){display:none}
+
+.family-art.anthology-panel img{width:100%;height:100%;object-fit:contain;object-position:center;background:#151913}
+#entermenu{color:#19170c;background:#efc75f;border:2px solid #f7d985;font-weight:800}
+
+#ending.skull-epilogue{background:linear-gradient(#130b0acc,#130b0aeb),url('comic/weathered-studio.webp') center/cover}
+
+#result{overflow:auto}.result-grid .result-portrait{display:block;width:100%;height:clamp(115px,30vh,290px);object-fit:contain}
+#story .family-comic{display:flex;flex-direction:column;align-items:center;gap:8px;flex:0 0 auto}
+.chapter-art{display:block;max-width:100%;width:auto;height:clamp(190px,36vh,390px);object-fit:contain}
+.chapter-dialogue{width:min(100%,670px);color:#fff1d9}.chapter-dialogue p{margin:4px 0;line-height:1.35}.chapter-dialogue strong{color:#e5c276}
+
+#game{object-fit:contain}
+
+.round-options{flex-direction:row;align-items:center}.round-options button.selected{color:#191e17;background:#eed28c}
