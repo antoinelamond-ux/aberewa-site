@@ -173,7 +173,7 @@ if (typeof ResizeObserver === 'function') {
  window.addEventListener('resize', fitCanvas);
  fitCanvas();
 }
-const roster=[['Dandara','The rhythm keeper'],['Jurema','Braided thunder'],['Celina','Forty years of Capoeira Angola'],['Zinga','The fearless flame'],['Lua','Moonlit malícia'],['Iara','The flowing tide'],['Nala','Quiet lightning'],['Meilin','The gilded low guard'],['Jaci','Blue horizon'],['Sol','The golden hour'],['Ayana','The white braid'],['Bento','The steady mountain'],,['Nestor','The old fox'],['Mestre Maré','Mestre • all hard kicks • +10% health'],['Aisha','Sentinel of 2323'],['Heather','Oakland to Bahia'],['Femur','The rival from another roda']];
+const roster=[['Dandara','The rhythm keeper'],['Jurema','Braided thunder'],['Celina','Forty years of Capoeira Angola'],['Zinga','The fearless flame'],['Lua','Moonlit malícia'],['Iara','The flowing tide'],['Nala','Quiet lightning'],['Meilin','The gilded low guard'],['Femur','Blue horizon'],['Sol','The golden hour'],['Ayana','The white braid'],['Bento','The steady mountain'],,['Nestor','The old fox'],['Mestre Maré','Mestre • all hard kicks • +10% health'],['Aisha','Sentinel of 2323'],['Heather','Oakland to Bahia'],['Femur','The rival from another roda']];
 // Sprite sheets and saved ranks use stable fighter IDs.
 const playableIds=Object.freeze(roster.flatMap((fighter,id)=>fighter?[id]:[]));
 function nextFighter(id,offset){
