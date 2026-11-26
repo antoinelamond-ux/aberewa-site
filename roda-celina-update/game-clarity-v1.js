@@ -841,7 +841,7 @@ zingaGrey.bencao.src='zinga-alt/bencao.webp';
 window.__zingaGreyDefeat=zingaGrey.defeat; // defeat-render-v25 reads this for id 3
 const ZINGA_ID=3;
 // pick the grey sheet for Zinga, the shared sheet for everyone else
-function zingaImage(id,fallback,key){return id===ZINGA_ID?zingaGrey[key]:fallback}
+function zingaImage(id,fallback,key){return fallback} // Zinga: original art, no recolour
 
 const gingaImages=[1,2,3,4].map(n=>{let im=new Image();im.src='ginga-'+n+'.webp';return im});
 async function loadFighterImage(image) {
