@@ -484,7 +484,7 @@ const familyEnding=[
  ],
  [
   "comic/welcome-4.webp",
-  "Meilin places the last key in Aisha’s hand. “Why me?” Aisha asks. Meilin throws her arms open and yells, “Welcome to Roda!”"
+  "Meilin throws her arms open to the whole room and yells, “Welcome to Roda!”"
  ]
 ];
 const skullEnding=[["comic/fire-window.webp","Bento and Nestor throw a Molotov cocktail through the studio window. The studio catches fire."]];
