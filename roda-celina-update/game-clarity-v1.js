@@ -828,16 +828,16 @@ const motionImages=[1,2,3].map(n=>{let im=new Image();im.src='motion-'+n+'.webp'
 // ZINGA (3) — grey outfit is her default look. These sheets carry her frames;
 // every other fighter's cells are untouched copies of the originals.
 const zingaGrey={ginga:new Image(),motion:new Image(),turn:new Image(),normal:new Image(),special:new Image(),reactions:new Image(),transitions:new Image(),defeat:new Image()};
-zingaGrey.ginga.src='zinga-grey/ginga.webp';
-zingaGrey.motion.src='zinga-grey/motion.webp';
-zingaGrey.turn.src='zinga-grey/turn.webp';
-zingaGrey.normal.src='zinga-grey/normal.webp';
-zingaGrey.special.src='zinga-grey/special-0.webp';
-zingaGrey.reactions.src='zinga-grey/reactions.webp';
-zingaGrey.transitions.src='zinga-grey/transitions.webp';
-zingaGrey.defeat.src='zinga-grey/defeat.webp';
+zingaGrey.ginga.src='zinga-alt/ginga.webp';
+zingaGrey.motion.src='zinga-alt/motion.webp';
+zingaGrey.turn.src='zinga-alt/turn.webp';
+zingaGrey.normal.src='zinga-alt/normal.webp';
+zingaGrey.special.src='zinga-alt/special-0.webp';
+zingaGrey.reactions.src='zinga-alt/reactions.webp';
+zingaGrey.transitions.src='zinga-alt/transitions.webp';
+zingaGrey.defeat.src='zinga-alt/defeat.webp';
 zingaGrey.bencao=new Image();
-zingaGrey.bencao.src='zinga-grey/bencao.webp';
+zingaGrey.bencao.src='zinga-alt/bencao.webp';
 window.__zingaGreyDefeat=zingaGrey.defeat; // defeat-render-v25 reads this for id 3
 const ZINGA_ID=3;
 // pick the grey sheet for Zinga, the shared sheet for everyone else
