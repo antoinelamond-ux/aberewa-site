@@ -1,6 +1,6 @@
 const defeatImages=Object.fromEntries(Object.entries(defeatData).map(([id,d])=>{const im=new Image();im.src=d.src+([11,13].includes(Number(id))?"?v=3.4.2":"");return [id,im]}));
 function drawDefeat(p){
- const d=defeatData[p.id],im=defeatImages[p.id];if(!im?.complete||!im.naturalWidth)return;
+ const d=defeatData[p.id],im=(p.id===3&&window.__zingaGreyDefeat)?window.__zingaGreyDefeat:defeatImages[p.id];if(!im?.complete||!im.naturalWidth)return;
  const tempos=[7,6,10,7,5,8,6,8,5,7,9,11,5,10,12];
  const age=Math.max(0,tick-p.hitAt),frame=p.y>0?1:Math.min(5,Math.floor(age/tempos[p.id]));
  const r=d.rects[frame],f=legacyModelScale(p.id,'defeat')*305/d.referenceHeight;

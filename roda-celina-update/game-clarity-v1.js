@@ -669,7 +669,7 @@ const turnImages=[1,2,3].map(n=>{let i=new Image();i.src='turn-cycle-'+n+'.webp'
 const highHitImage=new Image();highHitImage.src='high-hit.webp?v=3.4.2';
 const bossExtra=new Image();bossExtra.src='mestre-extra.webp';
 const reactionRects=[[[9, 7, 233, 283], [299, 40, 180, 250], [515, 178, 320, 115], [876, 66, 213, 223]], [[10, 299, 246, 273], [299, 322, 192, 248], [491, 460, 346, 115], [878, 346, 223, 226]], [[10, 579, 240, 263], [298, 606, 162, 235], [516, 730, 320, 115], [874, 624, 224, 219]], [[11, 850, 241, 282], [300, 878, 172, 247], [509, 1010, 328, 118], [874, 896, 227, 229]], [[9, 1132, 246, 266], [299, 1147, 175, 251], [514, 1279, 323, 121], [874, 1172, 227, 228]], [[11, 18, 253, 262], [334, 57, 157, 223], [515, 163, 328, 118], [880, 87, 220, 194]], [[29, 289, 237, 275], [323, 321, 157, 243], [517, 448, 326, 118], [880, 349, 220, 217]], [[9, 572, 256, 278], [325, 609, 179, 241], [504, 725, 340, 126], [878, 644, 223, 207]], [[28, 859, 240, 270], [319, 900, 159, 229], [511, 1010, 333, 119], [877, 918, 224, 212]], [[14, 1139, 255, 258], [327, 1171, 177, 226], [504, 1272, 340, 124], [876, 1196, 225, 201]], [[59, 5, 212, 240], [431, 30, 136, 216], [689, 146, 317, 103], [1103, 66, 197, 182]], [[45, 249, 234, 235], [422, 286, 147, 197], [707, 249, 303, 236], [1094, 310, 209, 175]], [[57, 485, 224, 232], [417, 518, 144, 198], [704, 485, 307, 236], [1093, 536, 210, 184]], [[42, 722, 242, 226], [417, 752, 144, 196], [704, 721, 303, 230], [1093, 774, 209, 176]], [[59, 952, 217, 193], [429, 971, 132, 174], [680, 1050, 322, 95], [1096, 990, 200, 155]]];
-function extraSprite(p,frame,x,y,isTransition=false,scale=1.4){if(p.id===14){drawLeanMestre(ctx,'extra',isTransition?4+frame:frame,x,y,p.dir);return}let im=p.id===14?bossExtra:(isTransition?transitionImages:reactionImages)[Math.floor(p.id/5)];if(!im.complete||!im.naturalWidth){sprite(ctx,p.id,p.down?4:1,x,y,scale,p.dir);return}if(!isTransition&&p.id!==14){let r=reactionRects[p.id][frame],factor=legacyModelScale(p.id,'reaction')*205*scale/reactionRects[p.id][0][3];ctx.save();ctx.translate(x,y);ctx.scale(p.dir,1);ctx.drawImage(im,...r,-r[2]*factor/2,-r[3]*factor,r[2]*factor,r[3]*factor);ctx.restore();return}let key=p.id===14?'mestre-extra.webp':'transitions-'+(Math.floor(p.id/5)+1)+'.webp';let index=p.id===14?(isTransition?4+frame:frame):(p.id%5)*8+frame;
+function extraSprite(p,frame,x,y,isTransition=false,scale=1.4){if(p.id===14){drawLeanMestre(ctx,'extra',isTransition?4+frame:frame,x,y,p.dir);return}let im=p.id===14?bossExtra:zingaImage(p.id,(isTransition?transitionImages:reactionImages)[Math.floor(p.id/5)],isTransition?'transitions':'reactions');if(!im.complete||!im.naturalWidth){sprite(ctx,p.id,p.down?4:1,x,y,scale,p.dir);return}if(!isTransition&&p.id!==14){let r=reactionRects[p.id][frame],factor=legacyModelScale(p.id,'reaction')*205*scale/reactionRects[p.id][0][3];ctx.save();ctx.translate(x,y);ctx.scale(p.dir,1);ctx.drawImage(im,...r,-r[2]*factor/2,-r[3]*factor,r[2]*factor,r[3]*factor);ctx.restore();return}let key=p.id===14?'mestre-extra.webp':'transitions-'+(Math.floor(p.id/5)+1)+'.webp';let index=p.id===14?(isTransition?4+frame:frame):(p.id%5)*8+frame;
  let r=spriteBounds[key][index],factor=legacyModelScale(p.id,'transition')*205*scale/(im.height/(p.id===14?3:5));ctx.save();ctx.translate(x,y);ctx.scale(p.dir,1);ctx.drawImage(im,...r,-r[2]*factor/2,-r[3]*factor,r[2]*factor,r[3]*factor);ctx.restore()}
 
 function drawLeanMestre(c,kind,frame,x,y,dir=1,opacity=1){
@@ -680,10 +680,10 @@ function drawLeanMestre(c,kind,frame,x,y,dir=1,opacity=1){
 
  c.save();c.globalAlpha*=opacity;c.translate(x,y);c.scale(dir,1);c.drawImage(im,...r,(r[0]-data.anchors[frame])*factor,-r[3]*factor,r[2]*factor,r[3]*factor);c.restore();
 }
-function drawMotion(p,f,x=p.x,y=590-p.y,opacity=1){if(p.id===14){drawLeanMestre(ctx,'cycles',16+f,x,y,p.dir,opacity);return}let im=motionImages[Math.floor(p.id/5)];if(!im.complete||!im.naturalWidth)return;let r=motionRects[p.id][f],reference=motionRects[p.id][4][3],factor=legacyModelScale(p.id,'motion')*305/reference;// Tucked legs shorten the silhouette; do not raise the entire body again.
+function drawMotion(p,f,x=p.x,y=590-p.y,opacity=1){if(p.id===14){drawLeanMestre(ctx,'cycles',16+f,x,y,p.dir,opacity);return}let im=zingaImage(p.id,motionImages[Math.floor(p.id/5)],'motion');if(!im.complete||!im.naturalWidth)return;let r=motionRects[p.id][f],reference=motionRects[p.id][4][3],factor=legacyModelScale(p.id,'motion')*305/reference;// Tucked legs shorten the silhouette; do not raise the entire body again.
 let lift=0;ctx.save();ctx.globalAlpha*=opacity;ctx.translate(x,y-lift);ctx.scale(p.dir,1);ctx.drawImage(im,...r,-r[2]*factor/2,-r[3]*factor,r[2]*factor,r[3]*factor);ctx.restore()}
 function drawExclusiveSpecial(p,base,m,wind,recover){
- const data=specialData[p.id][base.exclusiveSlot],im=specialImages[data.sheet];if(!im.complete||!im.naturalWidth)return;
+ const data=specialData[p.id][base.exclusiveSlot],im=zingaImage(p.id,specialImages[data.sheet],'special');if(!im.complete||!im.naturalWidth)return;
  let frame=wind?Math.min(base.phases[0].contactPose-1,Math.floor(p.at/base.start*base.phases[0].contactPose)):recover?6+Math.min(1,Math.floor((p.at-base.start-base.active)/base.end*2)):m.contactPose;
  if(!wind&&!recover&&m.phaseFrame>7&&m.phase<base.phases.length-1)frame=4;
  const r=data.rects[frame],factor=legacyModelScale(p.id,'special'+base.exclusiveSlot)*305/Math.max(data.rects[0][3],data.rects[7][3]);ctx.save();ctx.translate(p.x,590-p.y);ctx.scale(p.dir,1);ctx.drawImage(im,...r,(r[0]-data.anchors[frame])*factor,-r[3]*factor,r[2]*factor,r[3]*factor);ctx.restore();
@@ -694,7 +694,7 @@ function drawBencao(p,frame,x=p.x,y=590-p.y){
  frame=clamp(frame,0,7);const r=data.rects[frame],factor=legacyModelScale(p.id,'bencao')*305/Math.max(...data.rects.map(r=>r[3]));
  ctx.save();ctx.translate(x,y);ctx.scale(p.dir,1);ctx.drawImage(im,...r,(r[0]-data.anchors[frame])*factor,-r[3]*factor,r[2]*factor,r[3]*factor);ctx.restore();
 }
-function drawTurnCycle(p,frame,x=p.x,y=590-p.y){if(p.id===14){drawLeanMestre(ctx,'cycles',8+frame,x,y,p.dir);return}let im=turnImages[Math.floor(p.id/5)];if(!im.complete||!im.naturalWidth)return;
+function drawTurnCycle(p,frame,x=p.x,y=590-p.y){if(p.id===14){drawLeanMestre(ctx,'cycles',8+frame,x,y,p.dir);return}let im=zingaImage(p.id,turnImages[Math.floor(p.id/5)],'turn');if(!im.complete||!im.naturalWidth)return;
  frame=clamp(frame,0,7);let r=turnRects[p.id][frame],factor=legacyModelScale(p.id,'turn')*305/turnRects[p.id][0][3];ctx.save();ctx.translate(x,y);ctx.scale(p.dir,1);ctx.drawImage(im,...r,(r[0]-turnAnchors[p.id][frame])*factor,-r[3]*factor,r[2]*factor,r[3]*factor);ctx.restore();}
 function drawHighHit(p){if(p.id===14){drawLeanMestre(ctx,'extra',0,p.x,590-p.y,p.dir);return}let age=tick-p.hitAt;
  if(age>17&&p.down<=0&&p.hp>0){extraSprite(p,0,p.x,590-p.y,true,1.48);return}
@@ -751,7 +751,7 @@ function drawTechniqueSequence(p,base,m){
  drawSpecialFrame(p,slot,sequenceFrame(p,base,contact));return true;
 }
 function drawSpecialFrame(p,slot,frame){
- const data=specialData[p.id][slot],im=specialImages[data.sheet];if(!im.complete||!im.naturalWidth)return;
+ const data=specialData[p.id][slot],im=zingaImage(p.id,specialImages[data.sheet],'special');if(!im.complete||!im.naturalWidth)return;
  const r=data.rects[frame],factor=legacyModelScale(p.id,'special'+slot)*305/Math.max(data.rects[0][3],data.rects[7][3]);
  ctx.save();ctx.translate(p.x,590-p.y);ctx.scale(p.dir,1);ctx.drawImage(im,...r,(r[0]-data.anchors[frame])*factor,-r[3]*factor,r[2]*factor,r[3]*factor);ctx.restore();
 }
@@ -769,7 +769,7 @@ function drawAttack(p,t){
  }
  // Dedicated new normal art, using the same renderer in matches and review.
  if(!isProtagonist(p.id)&&p.y===0&&p.attack===(p.id===4?0:2)){
-  const data=normalSequencesV23[p.id],im=normalSequenceImages[Math.floor(p.id/5)];
+  const data=normalSequencesV23[p.id],im=zingaImage(p.id,normalSequenceImages[Math.floor(p.id/5)],'normal');
   if(im.complete&&im.naturalWidth){const frame=sequenceFrame(p,base,4),r=data.rects[frame],factor=legacyModelScale(p.id,'normal')*305/data.rects[0][3];
    ctx.save();ctx.translate(p.x,590);ctx.scale(p.dir,1);ctx.drawImage(im,...r,(r[0]-data.anchors[frame])*factor,-r[3]*factor,r[2]*factor,r[3]*factor);ctx.restore();return}
  }
@@ -825,6 +825,22 @@ function render(dt){if(scene==='foundation'){drawFoundation();return;}watchExit.
 let uiTick=0;let accumulator=0;function frame(now){if(typeof animationReview==='function'){animationReview(now);requestAnimationFrame(frame);return}let elapsed=Math.min(100,Math.max(0,now-last||16.6667));last=now;accumulator+=elapsed;while(accumulator>=16.6667){uiTick++;let states=pollPads();if(scene!=='pause'&&freeze<=0)tick++;update(1,states);accumulator-=16.6667}render(1);requestAnimationFrame(frame)}
 window.addEventListener('blur',()=>{if((scene==='fight'||scene==='result'||scene==='story'))togglePause('Game paused while the window is inactive.')});document.addEventListener('visibilitychange',()=>{if(document.hidden&&(scene==='fight'||scene==='result'||scene==='story'))togglePause('Game paused while the page is hidden.')});
 const motionImages=[1,2,3].map(n=>{let im=new Image();im.src='motion-'+n+'.webp'+(n===3?'?v=3.4.2':'');return im});
+// ZINGA (3) — grey outfit is her default look. These sheets carry her frames;
+// every other fighter's cells are untouched copies of the originals.
+const zingaGrey={ginga:new Image(),motion:new Image(),turn:new Image(),normal:new Image(),special:new Image(),reactions:new Image(),transitions:new Image(),defeat:new Image()};
+zingaGrey.ginga.src='zinga-grey/ginga.webp';
+zingaGrey.motion.src='zinga-grey/motion.webp';
+zingaGrey.turn.src='zinga-grey/turn.webp';
+zingaGrey.normal.src='zinga-grey/normal.webp';
+zingaGrey.special.src='zinga-grey/special-0.webp';
+zingaGrey.reactions.src='zinga-grey/reactions.webp';
+zingaGrey.transitions.src='zinga-grey/transitions.webp';
+zingaGrey.defeat.src='zinga-grey/defeat.webp';
+window.__zingaGreyDefeat=zingaGrey.defeat; // defeat-render-v25 reads this for id 3
+const ZINGA_ID=3;
+// pick the grey sheet for Zinga, the shared sheet for everyone else
+function zingaImage(id,fallback,key){return id===ZINGA_ID?zingaGrey[key]:fallback}
+
 const gingaImages=[1,2,3,4].map(n=>{let im=new Image();im.src='ginga-'+n+'.webp';return im});
 async function loadFighterImage(image) {
  if (image.complete && image.naturalWidth) return;
@@ -838,7 +854,7 @@ async function loadFighterImage(image) {
  }
 }
 installRecordUI();
-Promise.all([celinaImage,celinaMovement,celinaCard,heatherArt,heatherWhiteArt,groundRollArt,aishaArt,aishaMirrorArt,meilinRetreatArt,retreatArt,...Object.values(gingaImagesV26),...Object.values(defeatImages),...Object.values(redesignImages),...privateArenaImages,...normalSequenceImages,...specialImages,...Object.values(leanMestreImages),...bencaoImages,...turnImages,highHitImage,...motionImages,...atlases,bossImage,...reactionImages,...transitionImages,bossExtra,...arenaImages,musicianImage].map(loadFighterImage)).then(()=>new Promise(resolve=>{if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',resolve,{once:true});else resolve();})).then(()=>window.RODAFemur?window.RODAFemur.ready():null).then(()=>{loaded=true;roster.forEach((f,i)=>{let b=document.createElement('button');b.className='fightercard';b.setAttribute('aria-label',f[0]);let c=document.createElement('canvas');c.width=300;c.height=200;b.append(c);facePortrait(c,i);let span=document.createElement('span');span.textContent=f[0].toUpperCase();b.append(span);b.onclick=()=>{pick=i;updatePick()};$('#roster').append(b)});rosterBuilt=true;updatePick()}).catch(error=>{console.error('RODA artwork or selection:',error);$('#padhelp').textContent='Could not prepare the roster: '+error.message;});
+Promise.all([celinaImage,celinaMovement,celinaCard,heatherArt,heatherWhiteArt,groundRollArt,aishaArt,aishaMirrorArt,meilinRetreatArt,retreatArt,...Object.values(gingaImagesV26),...Object.values(defeatImages),...Object.values(redesignImages),...privateArenaImages,...normalSequenceImages,...specialImages,...Object.values(leanMestreImages),...bencaoImages,...turnImages,highHitImage,...motionImages,...Object.values(zingaGrey),...atlases,bossImage,...reactionImages,...transitionImages,bossExtra,...arenaImages,musicianImage].map(loadFighterImage)).then(()=>new Promise(resolve=>{if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',resolve,{once:true});else resolve();})).then(()=>window.RODAFemur?window.RODAFemur.ready():null).then(()=>{loaded=true;roster.forEach((f,i)=>{let b=document.createElement('button');b.className='fightercard';b.setAttribute('aria-label',f[0]);let c=document.createElement('canvas');c.width=300;c.height=200;b.append(c);facePortrait(c,i);let span=document.createElement('span');span.textContent=f[0].toUpperCase();b.append(span);b.onclick=()=>{pick=i;updatePick()};$('#roster').append(b)});rosterBuilt=true;updatePick()}).catch(error=>{console.error('RODA artwork or selection:',error);$('#padhelp').textContent='Could not prepare the roster: '+error.message;});
 buildStage();requestAnimationFrame(frame);
 
 function drawArena(){if(activeStage>=18){drawPrivateArena();return}let image=arenaImages[Math.floor(activeStage/6)],cell=activeStage%6;let camera=players.length&&scene==='fight'?clamp(((players[0].x+players[1].x)/2-640)*.025,-12,12):Math.sin(tick*.002)*4;if(image.complete&&image.naturalWidth){let aw=image.width/2,ah=image.height/3;ctx.drawImage(image,(cell%2)*aw,Math.floor(cell/2)*ah,aw,ah,-16-camera,-8,W+32,H+16)}else ctx.drawImage(stage,0,0);
@@ -882,7 +898,7 @@ const portraitImages=["dandara", "jurema", "celina", "zinga", "lua", "iara", "na
 // A held rear-foot ginga base while idle; feet never move with the breath.
 function drawGinga(p){
  if(p.id===9){drawRedesignFrame(p,1);return;}
- const d=gingaV26[p.id],im=gingaImagesV26[p.id];if(!d||!im?.complete||!im.naturalWidth)return;
+ const d=gingaV26[p.id],im=zingaImage(p.id,gingaImagesV26[p.id],'ginga');if(!d||!im?.complete||!im.naturalWidth)return;
  // Hold the reference guard when stationary. A stable canvas origin replaces per-frame foot centering.
  const count=d.rects.length,cycle=count*22,phase=((p.ginga%cycle)+cycle)%cycle;
  const frame=Math.abs(p.vx)>.25?Math.floor(phase/22):0;
