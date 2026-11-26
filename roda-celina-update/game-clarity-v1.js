@@ -690,7 +690,7 @@ function drawExclusiveSpecial(p,base,m,wind,recover){
 }
 function drawBencao(p,frame,x=p.x,y=590-p.y){
  if(p.id===14){drawLeanMestre(ctx,'cycles',frame,x,y,p.dir);return}
- const data=bencaoData[p.id],im=bencaoImages[data.sheet];if(!im.complete||!im.naturalWidth)return;
+ const data=bencaoData[p.id],im=zingaImage(p.id,bencaoImages[data.sheet],'bencao');if(!im.complete||!im.naturalWidth)return;
  frame=clamp(frame,0,7);const r=data.rects[frame],factor=legacyModelScale(p.id,'bencao')*305/Math.max(...data.rects.map(r=>r[3]));
  ctx.save();ctx.translate(x,y);ctx.scale(p.dir,1);ctx.drawImage(im,...r,(r[0]-data.anchors[frame])*factor,-r[3]*factor,r[2]*factor,r[3]*factor);ctx.restore();
 }
@@ -836,6 +836,8 @@ zingaGrey.special.src='zinga-grey/special-0.webp';
 zingaGrey.reactions.src='zinga-grey/reactions.webp';
 zingaGrey.transitions.src='zinga-grey/transitions.webp';
 zingaGrey.defeat.src='zinga-grey/defeat.webp';
+zingaGrey.bencao=new Image();
+zingaGrey.bencao.src='zinga-grey/bencao.webp';
 window.__zingaGreyDefeat=zingaGrey.defeat; // defeat-render-v25 reads this for id 3
 const ZINGA_ID=3;
 // pick the grey sheet for Zinga, the shared sheet for everyone else
